@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Minimal TV</string>
+    <string name="a11y_label">Minimal TV (botão Home)</string>
+    <string name="a11y_description">Faz o botão Home abrir o Minimal TV. Só percebe quando o launcher original da TCL aparece. Não lê o que está na tela.</string>
 </resources>
