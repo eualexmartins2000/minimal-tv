@@ -39,12 +39,14 @@ class MainActivity : Activity() {
 
     // Medidas do modelo (px em 1920x1080)
     private val MARGIN = 108
-    private val CARD_W = 308
-    private val CARD_H = 308
-    private val CARD_H_ON = 410      // card focado cresce pra cima
-    private val GAP = 41
-    private val CARD_RADIUS = 56
-    private val COLS = 5
+    private val CARD_W = 256
+    private val CARD_H = 256
+    private val CARD_H_ON = 342      // card focado cresce pra cima
+    private val GAP = 31
+    private val CARD_RADIUS = 48
+    private val COLS = 6
+    private val ICON_SIZE = 124
+    private val LABEL = 44f
 
     private var scale = 1f
     private fun px(v: Number) = (v.toFloat() * scale).roundToInt()
@@ -55,8 +57,10 @@ class MainActivity : Activity() {
 
     private lateinit var date: TextView
     private lateinit var clock: TextView
-    private lateinit var gridClock: TextView
     private lateinit var weather: TextView
+    private lateinit var gridDate: TextView
+    private lateinit var gridClock: TextView
+    private lateinit var gridWeather: TextView
 
     private lateinit var homeScroller: HorizontalScrollView
     private lateinit var homeRow: FrameLayout       // cards + nome
@@ -77,6 +81,7 @@ class MainActivity : Activity() {
             val day = SimpleDateFormat("EEE", locale).format(now).replace(".", "").uppercase(locale)
             val month = SimpleDateFormat("MMM", locale).format(now).replace(".", "").uppercase(locale)
             date.text = "$day, ${SimpleDateFormat("d", locale).format(now)} de $month"
+            gridDate.text = date.text
             clock.postDelayed(this, 10_000)
         }
     }
@@ -123,11 +128,11 @@ class MainActivity : Activity() {
     // ================= HOME =================
 
     private fun buildHome() {
-        date = text(40f).also { place(home, it, left = MARGIN, top = 111) }
-        weather = text(40f).also { place(home, it, top = 111, right = MARGIN, gravity = Gravity.END) }
-        clock = text(185f, light = true).also { place(home, it, top = 56, gravity = Gravity.CENTER_HORIZONTAL) }
+        date = text(30f).also { place(home, it, left = MARGIN, top = 106) }
+        weather = text(30f).also { place(home, it, top = 106, right = MARGIN, gravity = Gravity.END) }
+        clock = text(145f, light = true).also { place(home, it, top = 69, gravity = Gravity.CENTER_HORIZONTAL) }
 
-        circles(home, top = 270, gravity = Gravity.CENTER_HORIZONTAL)
+        circles(home, top = 246, gravity = Gravity.CENTER_HORIZONTAL)
 
         homeScroller = HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
@@ -136,7 +141,7 @@ class MainActivity : Activity() {
         homeRow = FrameLayout(this).apply { clipChildren = false }
         homeScroller.addView(homeRow, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
         home.addView(homeScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(CARD_H_ON)).apply {
-            topMargin = px(561); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
+            topMargin = px(630); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
         })
     }
 
@@ -144,9 +149,9 @@ class MainActivity : Activity() {
         homeRow.removeAllViews()
         val cards = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
         homeRow.addView(cards, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
-        val label = text(56f).apply { visibility = View.INVISIBLE }
+        val label = text(LABEL).apply { visibility = View.INVISIBLE }
         homeRow.addView(label, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            topMargin = px(5)
+            topMargin = px(2)
         })
 
         favorites.forEachIndexed { i, pkg ->
@@ -172,8 +177,10 @@ class MainActivity : Activity() {
     // ================= GRADE =================
 
     private fun buildGrid() {
-        gridClock = text(125f).also { place(grid, it, left = MARGIN, top = 69) }
-        circles(grid, top = 108, right = MARGIN, gravity = Gravity.END)
+        gridDate = text(30f).also { place(grid, it, left = MARGIN, top = 106) }
+        gridClock = text(30f).also { place(grid, it, top = 106, gravity = Gravity.CENTER_HORIZONTAL) }
+        gridWeather = text(30f).also { place(grid, it, top = 106, right = MARGIN, gravity = Gravity.END) }
+        circles(grid, top = 165, gravity = Gravity.CENTER_HORIZONTAL)
 
         gridScroller = ScrollView(this).apply {
             isVerticalScrollBarEnabled = false
@@ -184,7 +191,7 @@ class MainActivity : Activity() {
         gridList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
         gridScroller.addView(gridList)
         grid.addView(gridScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
-            topMargin = px(146); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
+            topMargin = px(254); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
         })
     }
 
@@ -196,9 +203,9 @@ class MainActivity : Activity() {
             val row = FrameLayout(this).apply { clipChildren = false }
             val cards = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
             row.addView(cards, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
-            val label = text(56f).apply { visibility = View.INVISIBLE }
+            val label = text(LABEL).apply { visibility = View.INVISIBLE }
             row.addView(label, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = px(5)
+                topMargin = px(2)
             })
             chunk.forEach { app ->
                 val c = card(app.label, app.pkg, label, null,
@@ -257,10 +264,10 @@ class MainActivity : Activity() {
         items.forEachIndexed { i, (icon, name) ->
             val c = FrameLayout(this).apply {
                 isFocusable = true
-                background = round(CARD, px(50).toFloat())
+                background = round(CARD, px(40).toFloat())
                 contentDescription = name
                 addView(ImageView(context).apply { setImageResource(icon); setColorFilter(ICON) },
-                    FrameLayout.LayoutParams(px(44), px(44), Gravity.CENTER))
+                    FrameLayout.LayoutParams(px(36), px(36), Gravity.CENTER))
                 setOnFocusChangeListener { v, has ->
                     (v.background as GradientDrawable).setColor(if (has) CARD_ON else CARD)
                     val s = if (has) 1.12f else 1f
@@ -269,7 +276,7 @@ class MainActivity : Activity() {
                 setOnClickListener { onCircle(i) }
                 setOnLongClickListener { onCircleLong(i) }
             }
-            bar.addView(c, LinearLayout.LayoutParams(px(100), px(100)).apply { if (i > 0) leftMargin = px(40) })
+            bar.addView(c, LinearLayout.LayoutParams(px(80), px(80)).apply { if (i > 0) leftMargin = px(30) })
         }
     }
 
@@ -323,19 +330,22 @@ class MainActivity : Activity() {
         val c = FrameLayout(this).apply {
             isFocusable = true
             contentDescription = name
-            background = round(CARD, px(CARD_RADIUS).toFloat())
+            val icon = pkg?.let { Apps.icon(context, it) }
+            // Card pintado com a cor que mais aparece no ícone
+            background = round(icon?.let { Apps.color(pkg, it) } ?: CARD, px(CARD_RADIUS).toFloat())
             val img = ImageView(context).apply {
-                if (pkg != null) setImageDrawable(Apps.icon(context, pkg))
+                if (pkg != null) setImageDrawable(icon)
                 else { setImageResource(R.drawable.ic_plus); setColorFilter(Color.WHITE) }
                 scaleType = ImageView.ScaleType.FIT_CENTER
             }
-            val s = if (pkg != null) 150 else 124
+            val s = if (pkg != null) ICON_SIZE else 104
             addView(img, FrameLayout.LayoutParams(px(s), px(s), Gravity.CENTER))
             if (isFav) {
                 // Bolinha = é favorito
-                addView(View(context).apply { background = round(ICON, px(9).toFloat()) },
-                    FrameLayout.LayoutParams(px(18), px(18), Gravity.TOP or Gravity.END).apply {
-                        topMargin = px(28); rightMargin = px(28)
+                addView(View(context).apply {
+                    background = round(Color.WHITE, px(8).toFloat()).apply { setStroke(px(2), ICON) }
+                }, FrameLayout.LayoutParams(px(16), px(16), Gravity.TOP or Gravity.END).apply {
+                        topMargin = px(22); rightMargin = px(22)
                     })
             }
             setOnFocusChangeListener { v, has ->
@@ -365,8 +375,8 @@ class MainActivity : Activity() {
         label.tag = card
         val w = label.paint.measureText(name)
         val visibleRight = (hScroll?.scrollX ?: 0) + px(1920 - 2 * MARGIN)
-        var x = card.left + px(CARD_W) + px(45).toFloat()
-        if (x + w > visibleRight) x = card.left - px(45) - w
+        var x = card.left + px(CARD_W) + px(GAP).toFloat()
+        if (x + w > visibleRight) x = card.left - px(GAP) - w
         label.translationX = x
         label.visibility = View.VISIBLE
     }

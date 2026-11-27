@@ -2,6 +2,9 @@ package com.alex.minimaltv
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 
 /** Um app que dá pra abrir na TV. */
@@ -31,6 +34,37 @@ object Apps {
         val pm = ctx.packageManager
         pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
     } catch (e: Exception) { pkg }
+
+    private val colors = HashMap<String, Int>()
+
+    /**
+     * Cor que mais aparece no ícone (ignora transparente).
+     * Desenha o ícone em 24x24 e conta as cores agrupadas. Fica guardada em memória.
+     */
+    fun color(pkg: String, icon: Drawable): Int = colors.getOrPut(pkg) {
+        val n = 24
+        val bmp = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp)
+        val old = icon.copyBounds()
+        icon.setBounds(0, 0, n, n)
+        icon.draw(c)
+        icon.bounds = old
+        val count = HashMap<Int, Int>()
+        val sum = HashMap<Int, IntArray>()
+        for (y in 0 until n) for (x in 0 until n) {
+            val p = bmp.getPixel(x, y)
+            if (Color.alpha(p) < 200) continue
+            val r = Color.red(p); val g = Color.green(p); val b = Color.blue(p)
+            val key = (r shr 5 shl 6) or (g shr 5 shl 3) or (b shr 5)
+            count[key] = (count[key] ?: 0) + 1
+            val s = sum.getOrPut(key) { IntArray(3) }
+            s[0] += r; s[1] += g; s[2] += b
+        }
+        bmp.recycle()
+        val best = count.maxByOrNull { it.value } ?: return@getOrPut Color.parseColor("#C8D0DA")
+        val s = sum[best.key]!!
+        Color.rgb(s[0] / best.value, s[1] / best.value, s[2] / best.value)
+    }
 
     /** Abre o app. Prefere a versão de TV. Retorna false se não deu. */
     fun open(ctx: Context, pkg: String): Boolean {
