@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import java.text.SimpleDateFormat
@@ -24,8 +25,8 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
- * Home. Medidas copiadas do modelo do Canva (design/home.png, 1920x1080)
- * e convertidas pro tamanho real da tela com px().
+ * Home + Grade. Medidas copiadas dos modelos do Canva
+ * (design/home.png e design/grade.png, 1920x1080) e convertidas com px().
  */
 class MainActivity : Activity() {
 
@@ -40,30 +41,39 @@ class MainActivity : Activity() {
     private val MARGIN = 108
     private val CARD_W = 308
     private val CARD_H = 308
-    private val CARD_H_ON = 410
-    private val CARD_GAP = 41
+    private val CARD_H_ON = 410      // card focado cresce pra cima
+    private val GAP = 41
     private val CARD_RADIUS = 56
-    private val STRIP_TOP = 561
+    private val COLS = 5
 
     private var scale = 1f
     private fun px(v: Number) = (v.toFloat() * scale).roundToInt()
 
     private lateinit var root: FrameLayout
+    private lateinit var home: FrameLayout
+    private lateinit var grid: FrameLayout
+
     private lateinit var date: TextView
     private lateinit var clock: TextView
+    private lateinit var gridClock: TextView
     private lateinit var weather: TextView
-    private lateinit var label: TextView
-    private lateinit var scroller: HorizontalScrollView
-    private lateinit var row: LinearLayout
+
+    private lateinit var homeScroller: HorizontalScrollView
+    private lateinit var homeRow: FrameLayout       // cards + nome
+    private lateinit var gridScroller: ScrollView
+    private lateinit var gridList: LinearLayout
 
     private var favorites = mutableListOf<String>()
-    private var focusedCard: View? = null
+    private var homeFocus = 0
+    private var gridFocusPkg: String? = null
 
     private val locale = Locale("pt", "BR")
     private val tick = object : Runnable {
         override fun run() {
             val now = Date()
-            clock.text = SimpleDateFormat("HH:mm", locale).format(now)
+            val hm = SimpleDateFormat("HH:mm", locale).format(now)
+            clock.text = hm
+            gridClock.text = hm
             val day = SimpleDateFormat("EEE", locale).format(now).replace(".", "").uppercase(locale)
             val month = SimpleDateFormat("MMM", locale).format(now).replace(".", "").uppercase(locale)
             date.text = "$day, ${SimpleDateFormat("d", locale).format(now)} de $month"
@@ -76,28 +86,21 @@ class MainActivity : Activity() {
         val dm = resources.displayMetrics
         scale = max(dm.widthPixels, dm.heightPixels) / 1920f
 
-        root = FrameLayout(this).apply { setBackgroundColor(BG); clipChildren = false }
+        root = FrameLayout(this).apply { setBackgroundColor(BG) }
         setContentView(root)
+        home = layer()
+        grid = layer().apply { visibility = View.GONE }
 
-        // Data (esquerda), relógio (centro), clima (direita, V2)
-        date = text(40f, light = false).also { place(it, left = MARGIN, top = 111) }
-        weather = text(40f, light = false).also {
-            place(it, top = 111, gravity = Gravity.END, right = MARGIN)
-        }
-        clock = text(185f, light = true).also { place(it, top = 56, gravity = Gravity.CENTER_HORIZONTAL) }
-
-        buildCircles()
-        buildStrip()
-
-        // Nome do app focado
-        label = text(56f, light = false).also { place(it, left = 0, top = 566) }
+        buildHome()
+        buildGrid()
     }
 
     override fun onResume() {
         super.onResume()
         tick.run()
         favorites = Favorites.load(this)
-        fillStrip()
+        fillHome()
+        if (grid.visibility == View.VISIBLE) fillGrid()
     }
 
     override fun onPause() {
@@ -108,22 +111,144 @@ class MainActivity : Activity() {
     // Apertar Home já estando aqui: volta pro primeiro favorito.
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        scroller.scrollTo(0, 0)
-        row.getChildAt(0)?.requestFocus()
+        showHome(first = true)
     }
 
-    // Voltar na Home não faz nada (não sai do launcher).
     @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {}
+    override fun onBackPressed() {
+        // Na grade, Voltar retorna pra Home. Na Home, não faz nada.
+        if (grid.visibility == View.VISIBLE) showHome()
+    }
 
-    // ---------- Círculos ----------
+    // ================= HOME =================
 
-    private fun buildCircles() {
-        val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; clipChildren = false; clipToPadding = false }
-        place(bar, top = 270, gravity = Gravity.CENTER_HORIZONTAL)
+    private fun buildHome() {
+        date = text(40f).also { place(home, it, left = MARGIN, top = 111) }
+        weather = text(40f).also { place(home, it, top = 111, right = MARGIN, gravity = Gravity.END) }
+        clock = text(185f, light = true).also { place(home, it, top = 56, gravity = Gravity.CENTER_HORIZONTAL) }
 
+        circles(home, top = 270, gravity = Gravity.CENTER_HORIZONTAL)
+
+        homeScroller = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            clipChildren = false
+        }
+        homeRow = FrameLayout(this).apply { clipChildren = false }
+        homeScroller.addView(homeRow, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
+        home.addView(homeScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(CARD_H_ON)).apply {
+            topMargin = px(561); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
+        })
+    }
+
+    private fun fillHome() {
+        homeRow.removeAllViews()
+        val cards = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
+        homeRow.addView(cards, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
+        val label = text(56f).apply { visibility = View.INVISIBLE }
+        homeRow.addView(label, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+            topMargin = px(5)
+        })
+
+        favorites.forEachIndexed { i, pkg ->
+            cards.addView(card(Apps.label(this, pkg), pkg, label, homeScroller,
+                onFocus = { homeFocus = i },
+                onClick = { open(pkg) }))
+        }
+        if (favorites.size < Favorites.MAX) {
+            cards.addView(card("Adicionar", null, label, homeScroller,
+                onFocus = { homeFocus = favorites.size },
+                onClick = { showGrid(hint = true) }))
+        }
+        if (home.visibility == View.VISIBLE) cards.getChildAt(homeFocus.coerceIn(0, cards.childCount - 1))?.requestFocus()
+    }
+
+    private fun showHome(first: Boolean = false) {
+        grid.visibility = View.GONE
+        home.visibility = View.VISIBLE
+        if (first) { homeFocus = 0; homeScroller.scrollTo(0, 0) }
+        fillHome()
+    }
+
+    // ================= GRADE =================
+
+    private fun buildGrid() {
+        gridClock = text(125f).also { place(grid, it, left = MARGIN, top = 69) }
+        circles(grid, top = 108, right = MARGIN, gravity = Gravity.END)
+
+        gridScroller = ScrollView(this).apply {
+            isVerticalScrollBarEnabled = false
+            clipChildren = false
+            clipToPadding = false
+            setPadding(0, 0, 0, px(60))
+        }
+        gridList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
+        gridScroller.addView(gridList)
+        grid.addView(gridScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
+            topMargin = px(146); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
+        })
+    }
+
+    private fun fillGrid() {
+        gridList.removeAllViews()
+        val apps = Apps.launchable(this)
+        var toFocus: View? = null
+        apps.chunked(COLS).forEachIndexed { r, chunk ->
+            val row = FrameLayout(this).apply { clipChildren = false }
+            val cards = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
+            row.addView(cards, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
+            val label = text(56f).apply { visibility = View.INVISIBLE }
+            row.addView(label, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = px(5)
+            })
+            chunk.forEach { app ->
+                val c = card(app.label, app.pkg, label, null,
+                    onFocus = { gridFocusPkg = app.pkg },
+                    onClick = { open(app.pkg) },
+                    onLong = { toggleFavorite(app) })
+                cards.addView(c)
+                if (app.pkg == gridFocusPkg) toFocus = c
+            }
+            gridList.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(CARD_H_ON)).apply {
+                if (r > 0) topMargin = px(GAP)
+            })
+        }
+        (toFocus ?: firstCard())?.requestFocus()
+    }
+
+    private fun firstCard(): View? =
+        ((gridList.getChildAt(0) as? FrameLayout)?.getChildAt(0) as? LinearLayout)?.getChildAt(0)
+
+    private fun showGrid(hint: Boolean = false) {
+        home.visibility = View.GONE
+        grid.visibility = View.VISIBLE
+        gridFocusPkg = null
+        gridScroller.scrollTo(0, 0)
+        fillGrid()
+        if (hint) toast("Segure OK num app para favoritar")
+    }
+
+    private fun toggleFavorite(app: App) {
+        if (app.pkg in favorites) {
+            favorites.remove(app.pkg); toast("${app.label} saiu dos favoritos")
+        } else if (favorites.size >= Favorites.MAX) {
+            toast("Limite de ${Favorites.MAX} favoritos"); return
+        } else {
+            favorites.add(app.pkg); toast("${app.label} nos favoritos")
+        }
+        Favorites.save(this, favorites)
+        gridFocusPkg = app.pkg
+        val y = gridScroller.scrollY
+        fillGrid()
+        gridScroller.post { gridScroller.scrollTo(0, y) }
+    }
+
+    // ================= CÍRCULOS =================
+
+    private fun circles(parent: FrameLayout, top: Int, right: Int = 0, gravity: Int) {
+        val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; clipChildren = false }
+        place(parent, bar, top = top, right = right, gravity = gravity)
         val items = listOf(
-            R.drawable.ic_grid to "Todos os apps",
+            R.drawable.ic_grid to "Home / Todos os apps",
             R.drawable.ic_theme to "Tema",
             R.drawable.ic_boost to "Acelerador",
             R.drawable.ic_hdmi to "HDMI",
@@ -134,28 +259,24 @@ class MainActivity : Activity() {
                 isFocusable = true
                 background = round(CARD, px(50).toFloat())
                 contentDescription = name
-                addView(ImageView(context).apply {
-                    setImageResource(icon)
-                    setColorFilter(ICON)
-                }, FrameLayout.LayoutParams(px(44), px(44), Gravity.CENTER))
+                addView(ImageView(context).apply { setImageResource(icon); setColorFilter(ICON) },
+                    FrameLayout.LayoutParams(px(44), px(44), Gravity.CENTER))
                 setOnFocusChangeListener { v, has ->
                     (v.background as GradientDrawable).setColor(if (has) CARD_ON else CARD)
-                    v.animate().scaleX(if (has) 1.12f else 1f).scaleY(if (has) 1.12f else 1f).setDuration(120).start()
-                    if (has) { focusedCard = null; showLabel(null) }
+                    val s = if (has) 1.12f else 1f
+                    v.animate().scaleX(s).scaleY(s).setDuration(120).start()
                 }
                 setOnClickListener { onCircle(i) }
                 setOnLongClickListener { onCircleLong(i) }
             }
-            bar.addView(c, LinearLayout.LayoutParams(px(100), px(100)).apply {
-                if (i > 0) leftMargin = px(40)
-            })
+            bar.addView(c, LinearLayout.LayoutParams(px(100), px(100)).apply { if (i > 0) leftMargin = px(40) })
         }
     }
 
     private fun onCircle(i: Int) {
         when (i) {
-            0 -> toast("Grade de apps: próximo passo")
-            1 -> toast("Tema claro/escuro: em breve")
+            0 -> if (grid.visibility == View.VISIBLE) showHome() else showGrid()
+            1 -> toast("Tema claro/escuro: próximo passo")
             2 -> boost()
             3 -> toast("HDMI: em breve")
             4 -> openSettings(Settings.ACTION_SETTINGS)
@@ -184,41 +305,25 @@ class MainActivity : Activity() {
         }
     }
 
-    // ---------- Faixa de favoritos ----------
-
-    private fun buildStrip() {
-        scroller = HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            isFillViewport = false
-            clipToPadding = false
-            setOnScrollChangeListener { _, _, _, _, _ -> focusedCard?.let { showLabel(it) } }
-        }
-        row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.BOTTOM
-        }
-        scroller.addView(row, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, px(CARD_H_ON)))
-        root.addView(scroller, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, px(CARD_H_ON)
-        ).apply {
-            topMargin = px(STRIP_TOP); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
-        })
+    private fun open(pkg: String) {
+        if (!Apps.open(this, pkg)) toast("Não deu pra abrir")
     }
 
-    private fun fillStrip() {
-        val hadFocus = row.indexOfChild(focusedCard).coerceAtLeast(0)
-        row.removeAllViews()
-        favorites.forEach { pkg -> row.addView(card(Apps.label(this, pkg), pkg)) }
-        if (favorites.size < Favorites.MAX) row.addView(card("Adicionar", null))
-        row.getChildAt(hadFocus.coerceAtMost(row.childCount - 1))?.requestFocus()
-    }
+    // ================= CARD =================
 
-    private fun card(name: String, pkg: String?): View {
+    /**
+     * Card de app. Focado: cresce de 308 pra 410 e mostra o nome ao lado
+     * (à direita; à esquerda se não couber na tela).
+     */
+    private fun card(
+        name: String, pkg: String?, label: TextView, hScroll: HorizontalScrollView?,
+        onFocus: () -> Unit, onClick: () -> Unit, onLong: (() -> Unit)? = null,
+    ): View {
+        val isFav = pkg != null && onLong != null && pkg in favorites
         val c = FrameLayout(this).apply {
             isFocusable = true
             contentDescription = name
             background = round(CARD, px(CARD_RADIUS).toFloat())
-            tag = name
             val img = ImageView(context).apply {
                 if (pkg != null) setImageDrawable(Apps.icon(context, pkg))
                 else { setImageResource(R.drawable.ic_plus); setColorFilter(Color.WHITE) }
@@ -226,59 +331,67 @@ class MainActivity : Activity() {
             }
             val s = if (pkg != null) 150 else 124
             addView(img, FrameLayout.LayoutParams(px(s), px(s), Gravity.CENTER))
-
+            if (isFav) {
+                // Bolinha = é favorito
+                addView(View(context).apply { background = round(ICON, px(9).toFloat()) },
+                    FrameLayout.LayoutParams(px(18), px(18), Gravity.TOP or Gravity.END).apply {
+                        topMargin = px(28); rightMargin = px(28)
+                    })
+            }
             setOnFocusChangeListener { v, has ->
-                setCardHeight(v, if (has) CARD_H_ON else CARD_H)
-                if (has) { focusedCard = v; v.post { showLabel(v) } }
+                setHeight(v, if (has) CARD_H_ON else CARD_H)
+                if (has) {
+                    onFocus()
+                    v.post { showLabel(label, name, v, hScroll) }
+                } else if (label.tag === v) {
+                    label.visibility = View.INVISIBLE
+                }
             }
-            setOnClickListener {
-                if (pkg == null) toast("Escolher favoritos: próximo passo")
-                else if (!Apps.open(context, pkg)) toast("Não deu pra abrir $name")
-            }
+            setOnClickListener { onClick() }
+            if (onLong != null) setOnLongClickListener { onLong(); true }
         }
-        val lp = LinearLayout.LayoutParams(px(CARD_W), px(CARD_H))
-        lp.rightMargin = px(CARD_GAP)
-        c.layoutParams = lp
+        c.layoutParams = LinearLayout.LayoutParams(px(CARD_W), px(CARD_H)).apply { rightMargin = px(GAP) }
         return c
     }
 
-    private fun setCardHeight(v: View, h: Int) {
+    private fun setHeight(v: View, h: Int) {
         val lp = v.layoutParams
         lp.height = px(h)
         v.layoutParams = lp
     }
 
-    /** Mostra o nome à direita do card focado (ou à esquerda se não couber). */
-    private fun showLabel(card: View?) {
-        if (card == null) { label.visibility = View.INVISIBLE; return }
-        label.text = card.tag as String
-        val w = label.paint.measureText(label.text.toString())
-        val cardLeft = px(MARGIN) + card.left - scroller.scrollX
-        var x = cardLeft + px(CARD_W) + px(45).toFloat()
-        if (x + w > root.width - px(MARGIN)) x = cardLeft - px(45) - w
+    private fun showLabel(label: TextView, name: String, card: View, hScroll: HorizontalScrollView?) {
+        label.text = name
+        label.tag = card
+        val w = label.paint.measureText(name)
+        val visibleRight = (hScroll?.scrollX ?: 0) + px(1920 - 2 * MARGIN)
+        var x = card.left + px(CARD_W) + px(45).toFloat()
+        if (x + w > visibleRight) x = card.left - px(45) - w
         label.translationX = x
         label.visibility = View.VISIBLE
     }
 
-    // ---------- Ajudantes ----------
+    // ================= AJUDANTES =================
 
-    private fun text(sizePx1080: Float, light: Boolean) = TextView(this).apply {
-        setTextColor(TEXT)
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, sizePx1080 * scale)
-        includeFontPadding = false
-        typeface = resources.getFont(if (light) R.font.inter_light else R.font.inter_regular)
-        isFocusable = false
+    private fun layer() = FrameLayout(this).apply { clipChildren = false }.also {
+        root.addView(it, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
-    private fun place(v: View, left: Int = 0, top: Int = 0, right: Int = 0, gravity: Int = Gravity.START) {
-        root.addView(v, FrameLayout.LayoutParams(
+    private fun text(size1080: Float, light: Boolean = false) = TextView(this).apply {
+        setTextColor(TEXT)
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, size1080 * scale)
+        includeFontPadding = false
+        maxLines = 1
+        typeface = resources.getFont(if (light) R.font.inter_light else R.font.inter_regular)
+    }
+
+    private fun place(parent: FrameLayout, v: View, left: Int = 0, top: Int = 0, right: Int = 0, gravity: Int = Gravity.START) {
+        parent.addView(v, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, gravity or Gravity.TOP
         ).apply { leftMargin = px(left); topMargin = px(top); rightMargin = px(right) })
     }
 
-    private fun round(color: Int, radius: Float) = GradientDrawable().apply {
-        setColor(color); cornerRadius = radius
-    }
+    private fun round(color: Int, radius: Float) = GradientDrawable().apply { setColor(color); cornerRadius = radius }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 }
