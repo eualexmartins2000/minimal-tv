@@ -113,6 +113,7 @@ class MainActivity : Activity() {
     private var menuLayer: FrameLayout? = null
     private var menuAnchor: View? = null
     private var menuBlocked: ViewGroup? = null
+    private var menuAfterClose: (() -> Unit)? = null
 
     private var favorites = mutableListOf<String>()
     private var homeFocus = 0
@@ -238,9 +239,11 @@ class MainActivity : Activity() {
                 moving = moveKind == MOVE_FAV && i == homeFocus))
         }
         if (favorites.size < Favorites.MAX) {
-            cards.addView(card("Adicionar", null, label, homeScroller,
+            var plus: View? = null
+            plus = card("Adicionar", null, label, homeScroller,
                 onFocus = { homeFocus = favorites.size },
-                onClick = { showGrid(hint = true) }))
+                onClick = { plus?.let { showAddPanel(it) } })
+            cards.addView(plus)
         }
         if (home.visibility == View.VISIBLE) cards.getChildAt(homeFocus.coerceIn(0, cards.childCount - 1))?.requestFocus()
     }
@@ -297,7 +300,7 @@ class MainActivity : Activity() {
                 val c = card(app.label, app.pkg, label, null,
                     onFocus = { gridFocusPkg = app.pkg },
                     onClick = { open(app.pkg) },
-                    onLong = { toggleFavorite(app) },
+                    onLong = { v -> gridMenu(v, app) },
                     showDot = true)
                 cards.addView(c)
                 if (app.pkg == gridFocusPkg) toFocus = c
@@ -421,6 +424,87 @@ class MainActivity : Activity() {
         showMenu(anchor, items)
     }
 
+    private fun gridMenu(anchor: View, app: App) {
+        val fav = app.pkg in favorites
+        showMenu(anchor, listOf(
+            (if (fav) "Remover dos favoritos" else "Adicionar aos favoritos") to { toggleFavorite(app) },
+            "Info do app" to { appInfo(app.pkg) },
+        ))
+    }
+
+    // ================= BARRA LATERAL "+" =================
+
+    /** Barra pela direita com os apps que ainda não são favoritos (mais novos primeiro). */
+    private fun showAddPanel(anchor: View) {
+        closeMenu()
+        val r = px(40).toFloat()
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = GradientDrawable().apply {
+                setColor(CARD)
+                cornerRadii = floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r)   // só os cantos da esquerda
+            }
+            elevation = px(16).toFloat()
+            setPadding(px(24), px(44), px(24), px(24))
+        }
+        panel.addView(text(30f, support = true).apply { text = "Adicionar aos favoritos" },
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                leftMargin = px(16); bottomMargin = px(24)
+            })
+        val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val scroller = ScrollView(this).apply { isVerticalScrollBarEnabled = false; addView(list) }
+        panel.addView(scroller, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+
+        val layer = FrameLayout(this).apply { isClickable = true }
+        layer.addView(panel, FrameLayout.LayoutParams(px(600), ViewGroup.LayoutParams.MATCH_PARENT, Gravity.END))
+        menuLayer = layer; menuAnchor = anchor; menuBlocked = home
+        // Ao fechar, o foco volta pro "+" (que andou pra frente conforme entram favoritos)
+        menuAfterClose = { homeFocus = favorites.size; fillHome() }
+        home.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        root.addView(layer, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        fillAddList(list, 0)
+    }
+
+    private fun fillAddList(list: LinearLayout, focusIndex: Int) {
+        list.removeAllViews()
+        val apps = Apps.newestFirst(this, Apps.launchable(this).filter { it.pkg !in favorites })
+        if (apps.isEmpty()) { toast("Todos os apps já são favoritos"); closeMenu(); return }
+        apps.forEach { app ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                isFocusable = true
+                setPadding(px(16), 0, px(16), 0)
+                background = round(Color.TRANSPARENT, px(32).toFloat())
+                val ic = ImageView(context).apply { setImageDrawable(Apps.icon(context, app.pkg)) }
+                addView(ic, LinearLayout.LayoutParams(px(72), px(72)))
+                val tv = TextView(context).apply {
+                    text = app.label
+                    maxLines = 1
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, 34f * scale)
+                    setTextColor(TEXT)
+                    typeface = resources.getFont(R.font.inter_regular)
+                }
+                addView(tv, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { leftMargin = px(24) })
+                setOnFocusChangeListener { v, has ->
+                    (v.background as GradientDrawable).setColor(if (has) ACCENT else Color.TRANSPARENT)
+                    tv.setTextColor(if (has) Color.WHITE else TEXT)
+                }
+                setOnClickListener {
+                    if (favorites.size >= Favorites.MAX) { toast("Limite de ${Favorites.MAX} favoritos"); return@setOnClickListener }
+                    val idx = list.indexOfChild(this)
+                    favorites.add(app.pkg)
+                    Favorites.save(this@MainActivity, favorites)
+                    toast("${app.label} nos favoritos")
+                    if (favorites.size >= Favorites.MAX) closeMenu() else fillAddList(list, idx)
+                    fillHome()   // a faixa atrás já mostra o app novo
+                }
+            }
+            list.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(104)))
+        }
+        list.getChildAt(focusIndex.coerceIn(0, list.childCount - 1))?.requestFocus()
+    }
+
     private fun removeFavorite(i: Int) {
         if (i !in favorites.indices) return
         val name = Apps.label(this, favorites[i])
@@ -472,7 +556,8 @@ class MainActivity : Activity() {
         anchor.getLocationInWindow(loc)
         val x = max(px(MARGIN), min(loc[0], root.width - panelW - px(MARGIN)))
         val above = loc[1] - panelH - px(16)
-        val y = if (above >= px(20)) above else loc[1] + anchor.height + px(16)
+        val minTop = if (grid.visibility == View.VISIBLE) px(254) else px(20)   // grade: não cobrir relógio/círculos
+        val y = if (above >= minTop) above else loc[1] + anchor.height + px(16)
 
         val layer = FrameLayout(this).apply { isClickable = true }
         layer.addView(panel, FrameLayout.LayoutParams(panelW, panelH).apply { leftMargin = x; topMargin = y })
@@ -486,8 +571,10 @@ class MainActivity : Activity() {
         val layer = menuLayer ?: return
         root.removeView(layer)
         menuBlocked?.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
-        menuAnchor?.requestFocus()
-        menuLayer = null; menuAnchor = null; menuBlocked = null
+        val after = menuAfterClose
+        val anchor = menuAnchor
+        menuLayer = null; menuAnchor = null; menuBlocked = null; menuAfterClose = null
+        if (after != null) after() else anchor?.requestFocus()
     }
 
     // ================= MODO MOVER =================

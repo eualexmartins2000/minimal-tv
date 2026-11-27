@@ -27,6 +27,13 @@ object Apps {
         return seen.values.sortedBy { it.label.lowercase() }
     }
 
+    /** Ordena do instalado mais recentemente pro mais antigo. */
+    fun newestFirst(ctx: Context, apps: List<App>): List<App> {
+        val pm = ctx.packageManager
+        fun t(pkg: String) = try { pm.getPackageInfo(pkg, 0).firstInstallTime } catch (e: Exception) { 0L }
+        return apps.sortedByDescending { t(it.pkg) }
+    }
+
     private val iconCache = HashMap<String, Drawable.ConstantState>()
 
     /** Ícone do app (guardado em memória: reconstruir a faixa é rápido). */
