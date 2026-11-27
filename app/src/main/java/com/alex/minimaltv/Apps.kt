@@ -27,8 +27,13 @@ object Apps {
         return seen.values.sortedBy { it.label.lowercase() }
     }
 
-    fun icon(ctx: Context, pkg: String): Drawable? =
-        try { ctx.packageManager.getApplicationIcon(pkg) } catch (e: Exception) { null }
+    private val iconCache = HashMap<String, Drawable.ConstantState>()
+
+    /** Ícone do app (guardado em memória: reconstruir a faixa é rápido). */
+    fun icon(ctx: Context, pkg: String): Drawable? = try {
+        iconCache[pkg]?.newDrawable()
+            ?: ctx.packageManager.getApplicationIcon(pkg).also { d -> d.constantState?.let { iconCache[pkg] = it } }
+    } catch (e: Exception) { null }
 
     fun label(ctx: Context, pkg: String): String = try {
         val pm = ctx.packageManager
