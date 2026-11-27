@@ -30,12 +30,28 @@ import kotlin.math.roundToInt
  */
 class MainActivity : Activity() {
 
-    // Cores (tema claro do modelo)
-    private val BG = Color.WHITE
-    private val TEXT = Color.BLACK
-    private val CARD = Color.parseColor("#C8D0DA")
-    private val CARD_ON = Color.parseColor("#AEB8C5")
-    private val ICON = Color.parseColor("#3C4450")
+    // Paleta (claro / escuro). Definida em onCreate conforme o tema salvo.
+    private var dark = false
+    private var BG = 0        // fundo do site
+    private var CARD = 0      // fundo de campos e cards sem cor própria
+    private var TEXT = 0      // título
+    private var SUPPORT = 0   // texto de apoio
+    private var ACCENT = 0    // destaque azul
+
+    private fun applyPalette() {
+        fun c(h: String) = Color.parseColor(h)
+        BG = c(if (dark) "#1C1C1E" else "#F5F5F7")
+        CARD = c(if (dark) "#3A3A3C" else "#E5E5EA")
+        TEXT = c(if (dark) "#F5F5F7" else "#1D1D1F")
+        SUPPORT = c(if (dark) "#98989D" else "#86868B")
+        ACCENT = c(if (dark) "#0A84FF" else "#007AFF")
+    }
+
+    /** Cor do card = cor do ícone, mas nunca igual ao fundo (ex.: card branco no fundo claro). */
+    private fun cardColor(raw: Int): Int {
+        val lum = (0.299 * Color.red(raw) + 0.587 * Color.green(raw) + 0.114 * Color.blue(raw)) / 255
+        return if (!dark && lum > 0.90) CARD else if (dark && lum < 0.16) CARD else raw
+    }
 
     // Medidas do modelo (px em 1920x1080)
     private val MARGIN = 108
@@ -91,6 +107,10 @@ class MainActivity : Activity() {
         val dm = resources.displayMetrics
         scale = max(dm.widthPixels, dm.heightPixels) / 1920f
 
+        dark = getSharedPreferences("minimaltv", MODE_PRIVATE).getBoolean("dark", false)
+        applyPalette()
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(BG))
+
         root = FrameLayout(this).apply { setBackgroundColor(BG) }
         setContentView(root)
         home = layer()
@@ -128,8 +148,8 @@ class MainActivity : Activity() {
     // ================= HOME =================
 
     private fun buildHome() {
-        date = text(30f).also { place(home, it, left = MARGIN, top = 106) }
-        weather = text(30f).also { place(home, it, top = 106, right = MARGIN, gravity = Gravity.END) }
+        date = text(30f, support = true).also { place(home, it, left = MARGIN, top = 106) }
+        weather = text(30f, support = true).also { place(home, it, top = 106, right = MARGIN, gravity = Gravity.END) }
         clock = text(145f, light = true).also { place(home, it, top = 69, gravity = Gravity.CENTER_HORIZONTAL) }
 
         circles(home, top = 246, gravity = Gravity.CENTER_HORIZONTAL)
@@ -177,15 +197,14 @@ class MainActivity : Activity() {
     // ================= GRADE =================
 
     private fun buildGrid() {
-        gridDate = text(30f).also { place(grid, it, left = MARGIN, top = 106) }
+        gridDate = text(30f, support = true).also { place(grid, it, left = MARGIN, top = 106) }
         gridClock = text(30f).also { place(grid, it, top = 106, gravity = Gravity.CENTER_HORIZONTAL) }
-        gridWeather = text(30f).also { place(grid, it, top = 106, right = MARGIN, gravity = Gravity.END) }
+        gridWeather = text(30f, support = true).also { place(grid, it, top = 106, right = MARGIN, gravity = Gravity.END) }
         circles(grid, top = 165, gravity = Gravity.CENTER_HORIZONTAL)
 
         gridScroller = ScrollView(this).apply {
             isVerticalScrollBarEnabled = false
-            clipChildren = false
-            clipToPadding = false
+            clipToPadding = false   // corta no topo (não vaza sobre os círculos), deixa respiro embaixo
             setPadding(0, 0, 0, px(60))
         }
         gridList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
@@ -266,10 +285,11 @@ class MainActivity : Activity() {
                 isFocusable = true
                 background = round(CARD, px(40).toFloat())
                 contentDescription = name
-                addView(ImageView(context).apply { setImageResource(icon); setColorFilter(ICON) },
+                addView(ImageView(context).apply { setImageResource(icon); setColorFilter(TEXT) },
                     FrameLayout.LayoutParams(px(36), px(36), Gravity.CENTER))
                 setOnFocusChangeListener { v, has ->
-                    (v.background as GradientDrawable).setColor(if (has) CARD_ON else CARD)
+                    (v.background as GradientDrawable).setColor(if (has) ACCENT else CARD)
+                    ((v as FrameLayout).getChildAt(0) as ImageView).setColorFilter(if (has) Color.WHITE else TEXT)
                     val s = if (has) 1.12f else 1f
                     v.animate().scaleX(s).scaleY(s).setDuration(120).start()
                 }
@@ -283,7 +303,10 @@ class MainActivity : Activity() {
     private fun onCircle(i: Int) {
         when (i) {
             0 -> if (grid.visibility == View.VISIBLE) showHome() else showGrid()
-            1 -> toast("Tema claro/escuro: próximo passo")
+            1 -> {
+                getSharedPreferences("minimaltv", MODE_PRIVATE).edit().putBoolean("dark", !dark).apply()
+                recreate()
+            }
             2 -> boost()
             3 -> toast("HDMI: em breve")
             4 -> openSettings(Settings.ACTION_SETTINGS)
@@ -332,10 +355,10 @@ class MainActivity : Activity() {
             contentDescription = name
             val icon = pkg?.let { Apps.icon(context, it) }
             // Card pintado com a cor que mais aparece no ícone
-            background = round(icon?.let { Apps.color(pkg, it) } ?: CARD, px(CARD_RADIUS).toFloat())
+            background = round(icon?.let { cardColor(Apps.color(pkg, it)) } ?: CARD, px(CARD_RADIUS).toFloat())
             val img = ImageView(context).apply {
                 if (pkg != null) setImageDrawable(icon)
-                else { setImageResource(R.drawable.ic_plus); setColorFilter(Color.WHITE) }
+                else { setImageResource(R.drawable.ic_plus); setColorFilter(SUPPORT) }
                 scaleType = ImageView.ScaleType.FIT_CENTER
             }
             val s = if (pkg != null) ICON_SIZE else 104
@@ -343,7 +366,7 @@ class MainActivity : Activity() {
             if (isFav) {
                 // Bolinha = é favorito
                 addView(View(context).apply {
-                    background = round(Color.WHITE, px(8).toFloat()).apply { setStroke(px(2), ICON) }
+                    background = round(ACCENT, px(8).toFloat()).apply { setStroke(px(2), Color.WHITE) }
                 }, FrameLayout.LayoutParams(px(16), px(16), Gravity.TOP or Gravity.END).apply {
                         topMargin = px(22); rightMargin = px(22)
                     })
@@ -387,8 +410,8 @@ class MainActivity : Activity() {
         root.addView(it, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
-    private fun text(size1080: Float, light: Boolean = false) = TextView(this).apply {
-        setTextColor(TEXT)
+    private fun text(size1080: Float, light: Boolean = false, support: Boolean = false) = TextView(this).apply {
+        setTextColor(if (support) SUPPORT else TEXT)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, size1080 * scale)
         includeFontPadding = false
         maxLines = 1
