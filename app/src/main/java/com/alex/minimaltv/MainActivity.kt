@@ -2,9 +2,12 @@ package com.alex.minimaltv
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.media.tv.TvContract
+import android.media.tv.TvInputManager
 import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
@@ -258,30 +261,22 @@ class MainActivity : Activity() {
     // ================= GRADE =================
 
     private fun buildGrid() {
-        gridDate = text(30f, support = true).also { place(grid, it, left = MARGIN, top = 106) }
-        gridClock = text(30f).also { place(grid, it, top = 106, gravity = Gravity.CENTER_HORIZONTAL) }
-        gridWeather = text(30f, support = true).also { place(grid, it, top = 106, right = MARGIN, gravity = Gravity.END) }
-        gridBar = circles(grid, top = 165, gravity = Gravity.CENTER_HORIZONTAL)
+        // Cabeçalho faz parte da página: rola junto com os apps, sobe e some (sem barra fixa).
+        val header = FrameLayout(this).apply { clipChildren = false }
+        gridDate = text(30f, support = true).also { place(header, it, left = MARGIN, top = 106) }
+        gridClock = text(30f).also { place(header, it, top = 106, gravity = Gravity.CENTER_HORIZONTAL) }
+        gridWeather = text(30f, support = true).also { place(header, it, top = 106, right = MARGIN, gravity = Gravity.END) }
+        gridBar = circles(header, top = 165, gravity = Gravity.CENTER_HORIZONTAL)
 
-        gridScroller = ScrollView(this).apply {
-            isVerticalScrollBarEnabled = false
-            // Importante: clipToPadding fica LIGADO (padrão). Desligado, o Android não corta nada e
-            // os cards vazam por cima do relógio e dos círculos.
-        }
+        gridScroller = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
+        val content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
+        content.addView(header, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(254)))
         gridList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
-        gridScroller.addView(gridList)
-        grid.addView(gridScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
-            topMargin = px(254); leftMargin = px(MARGIN); rightMargin = px(MARGIN)
+        content.addView(gridList, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+            leftMargin = px(MARGIN); rightMargin = px(MARGIN)
         })
-
-        // Efeito túnel: cabeçalho fixo e a grade some suavemente no topo e no rodapé
-        val clear = BG and 0x00FFFFFF
-        grid.addView(View(this).apply {
-            background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(BG, clear))
-        }, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(40)).apply { topMargin = px(254) })
-        grid.addView(View(this).apply {
-            background = GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(BG, clear))
-        }, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(90), Gravity.BOTTOM))
+        gridScroller.addView(content)
+        grid.addView(gridScroller, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
     private fun fillGrid() {
@@ -379,7 +374,7 @@ class MainActivity : Activity() {
                     val sc = if (has) 1.12f else 1f
                     v.animate().scaleX(sc).scaleY(sc).setDuration(120).start()
                 }
-                setOnClickListener { onCircle(id) }
+                setOnClickListener { onCircle(id, this) }
                 setOnLongClickListener { circleMenu(this, id); true }
             }
             bar.addView(c, LinearLayout.LayoutParams(px(80), px(80)).apply { if (pos > 0) leftMargin = px(30) })
@@ -395,7 +390,7 @@ class MainActivity : Activity() {
         for (i in 0 until bar.childCount) if (bar.getChildAt(i).tag == focusId) bar.getChildAt(i).requestFocus()
     }
 
-    private fun onCircle(id: Int) {
+    private fun onCircle(id: Int, view: View) {
         when (id) {
             0 -> if (grid.visibility == View.VISIBLE) showHome() else showGrid()
             1 -> {
@@ -403,7 +398,7 @@ class MainActivity : Activity() {
                 recreate()
             }
             2 -> boost()
-            3 -> toast("HDMI: em breve")
+            3 -> hdmiMenu(view)
             4 -> openSettings(Settings.ACTION_SETTINGS)
         }
     }
@@ -505,6 +500,29 @@ class MainActivity : Activity() {
         list.getChildAt(focusIndex.coerceIn(0, list.childCount - 1))?.requestFocus()
     }
 
+    // ================= HDMI =================
+
+    /** Lista as entradas da TV (HDMI 1, 2...) num menu; escolher troca a entrada. */
+    private fun hdmiMenu(anchor: View) {
+        val inputs = try {
+            (getSystemService(Context.TV_INPUT_SERVICE) as? TvInputManager)
+                ?.tvInputList?.filter { it.isPassthroughInput }
+        } catch (e: Exception) { null }
+        if (inputs.isNullOrEmpty()) { toast("Nenhuma entrada encontrada"); return }
+        showMenu(anchor, inputs.map { inp ->
+            val name = (try { inp.loadCustomLabel(this)?.toString() } catch (e: Exception) { null })
+                ?.takeIf { it.isNotBlank() } ?: inp.loadLabel(this).toString()
+            name to { openInput(inp.id) }
+        })
+    }
+
+    private fun openInput(id: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, TvContract.buildChannelUriForPassthroughInput(id))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) { toast("Não deu pra abrir a entrada") }
+    }
+
     private fun removeFavorite(i: Int) {
         if (i !in favorites.indices) return
         val name = Apps.label(this, favorites[i])
@@ -556,8 +574,7 @@ class MainActivity : Activity() {
         anchor.getLocationInWindow(loc)
         val x = max(px(MARGIN), min(loc[0], root.width - panelW - px(MARGIN)))
         val above = loc[1] - panelH - px(16)
-        val minTop = if (grid.visibility == View.VISIBLE) px(254) else px(20)   // grade: não cobrir relógio/círculos
-        val y = if (above >= minTop) above else loc[1] + anchor.height + px(16)
+        val y = if (above >= px(20)) above else loc[1] + anchor.height + px(16)
 
         val layer = FrameLayout(this).apply { isClickable = true }
         layer.addView(panel, FrameLayout.LayoutParams(panelW, panelH).apply { leftMargin = x; topMargin = y })
