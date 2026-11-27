@@ -262,8 +262,8 @@ class MainActivity : Activity() {
 
         gridScroller = ScrollView(this).apply {
             isVerticalScrollBarEnabled = false
-            clipToPadding = false   // corta no topo (não vaza sobre os círculos), deixa respiro embaixo
-            setPadding(0, 0, 0, px(60))
+            // Importante: clipToPadding fica LIGADO (padrão). Desligado, o Android não corta nada e
+            // os cards vazam por cima do relógio e dos círculos.
         }
         gridList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
         gridScroller.addView(gridList)
@@ -306,6 +306,8 @@ class MainActivity : Activity() {
                 if (r > 0) topMargin = px(GAP)
             })
         }
+        // Respiro no fim da lista (a última fileira sobe acima do degradê do rodapé)
+        gridList.addView(View(this), LinearLayout.LayoutParams(1, px(100)))
         (toFocus ?: firstCard())?.requestFocus()
     }
 
