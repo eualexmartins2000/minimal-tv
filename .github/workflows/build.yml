@@ -13,6 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Regra do projeto: segredo nunca vai pro Git. Se aparecer, o build falha.
+      - name: Bloquear segredos versionados
+        run: |
+          if git ls-files | grep -Ei '\.(keystore|jks|p12|pfx|pem)$|(^|/)\.env$|keystore\.properties$'; then
+            echo "::error::Arquivo de segredo versionado. Remova do Git e troque a chave (CLAUDE.md)."
+            exit 1
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -20,7 +28,21 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Preparar chave de assinatura (Secrets do GitHub)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Faltam os Secrets KEYSTORE_BASE64 e KEYSTORE_PASSWORD (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
       - name: Compilar
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: ./gradlew :app:assembleRelease
 
       - name: Renomear

@@ -3,3 +3,12 @@ build/
 local.properties
 *.iml
 .idea/
+
+# Segredos: nunca versionar (veja CLAUDE.md)
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+.env
+keystore.properties

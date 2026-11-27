@@ -15,13 +15,17 @@ android {
         versionName = "0.1.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
     }
 
-    // Chave fixa: sem ela cada build teria assinatura diferente e a TV recusaria atualizar.
+    // A chave de assinatura NUNCA fica no repositório (regra do projeto, veja CLAUDE.md).
+    // O build da nuvem recebe o arquivo e a senha pelos Secrets do GitHub, via variáveis de ambiente.
+    val keystorePath: String? = System.getenv("KEYSTORE_FILE")
     signingConfigs {
-        create("fixed") {
-            storeFile = file("minimaltv.keystore")
-            storePassword = "minimaltv"
-            keyAlias = "minimaltv"
-            keyPassword = "minimaltv"
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = "minimaltv"
+                keyPassword = System.getenv("KEYSTORE_PASSWORD")
+            }
         }
     }
 
@@ -30,7 +34,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            signingConfig = signingConfigs.getByName("fixed")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
