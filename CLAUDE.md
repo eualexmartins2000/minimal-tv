@@ -38,3 +38,10 @@
   `cp "/sdcard/Download/Downloader/$(ls -t /sdcard/Download/Downloader | head -1)" /data/local/tmp/mtv.apk`
   e `pm install -r /data/local/tmp/mtv.apk` (o sistema não lê o /sdcard direto).
 - Desfazer o serviço: `settings put secure enabled_accessibility_services ""`.
+
+## Logos de marca (protótipo e futuro app)
+- Vieram do Brandfetch (conector do Claude) e ficam em `design/logos/`. São marcas registradas das empresas:
+  uso pessoal neste launcher; não redistribuir como produto.
+- Têm logo próprio: Netflix, Prime Video, YouTube, Google Play. Sem logo utilizável: Globoplay (só selo
+  "100 anos"), Alexa (só Amazon), MegaTV, Downloader e apps de sistema. Esses usam o ícone do app.
+- A TV nunca busca logo na internet: os arquivos são embutidos no app em tempo de build.
