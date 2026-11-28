@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
 /* Layout: palco 1920x1080 (a TV) escalado pra caber; controles do protótipo embaixo.
-   Medidas do palco = design/v2 (círculos 76/28, placas 140x192, cards 256, focado 542, gap 30). */
+   Medidas do palco = design/v3 (botões 76, placas 206x286, cards 256, focado 542, gap 30). */
 :root{
   --page:#F5F5F7; --page-card:#FFFFFF; --page-fg:#1D1D1F; --page-mute:#6E6E73; --page-line:#D2D2D7; --page-accent:#007AFF;
   --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -57,24 +57,24 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-view="home"] .grid-screen{opacity:0;pointer-events:none;transform:scale(1.03)}
 .stage[data-view="grid"] .home-screen{opacity:0;pointer-events:none;transform:scale(.97)}
 
-/* círculos */
-.circles{position:absolute;left:0;right:0;top:108px;display:flex;justify-content:center;gap:28px}
-.circ{width:76px;height:76px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;cursor:pointer;
+/* botões do sistema: bloco 2x3 na Home, coluna na Grade */
+.sys{position:absolute;left:1328px;top:170px;display:grid;grid-template-columns:repeat(2,76px);grid-auto-rows:76px;column-gap:28px;row-gap:29px}
+.side{position:absolute;left:108px;top:240px;display:flex;flex-direction:column;gap:29px}
+.circ{width:76px;height:76px;border-radius:24px;border:0;padding:0;display:grid;place-items:center;cursor:pointer;
   background:var(--card);color:var(--text);transition:transform .22s var(--ease),background-color .22s,color .22s,box-shadow .22s}
 .circ svg{width:36px;height:36px;display:block}
 .circ.on{background:var(--accent);color:#fff;transform:scale(1.14)}
 .circ.pressed{transform:scale(.94)}
 
 /* relógio de placas */
-.clock{position:absolute;left:0;right:0;top:213px;display:flex;justify-content:center}
-.tile{position:relative;width:140px;height:192px;border-radius:20px;background:var(--card);margin-left:6px;
-  display:grid;place-items:center;font-size:152px;font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
-.tile:nth-child(3){margin-left:28px}.tile:first-child{margin-left:0}
-.tile::after{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;background:var(--slit)}
+.clock{position:absolute;left:414px;top:170px;display:flex}
+.tile{position:relative;width:206px;height:286px;border-radius:30px;background:var(--card);margin-left:14px;
+  display:grid;place-items:center;font-size:250px;font-weight:500;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.tile:nth-child(3){margin-left:30px}.tile:first-child{margin-left:0}
+.tile::after{content:"";position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--slit)}
 .tile.flip{animation:flip .24s ease-in-out}
 @keyframes flip{0%{transform:scaleY(1)}50%{transform:scaleY(.02)}100%{transform:scaleY(1)}}
-.date,.wx{position:absolute;left:0;right:0;text-align:center;font-size:28px;line-height:34px;color:var(--support);font-weight:400}
-.date{top:430px}.wx{top:467px}
+.date{position:absolute;left:0;right:0;top:106px;text-align:center;font-size:28px;line-height:34px;color:var(--support);font-weight:400}
 
 /* faixa da home */
 .strip{position:absolute;left:108px;top:676px;width:1704px;height:380px;overflow:hidden}
@@ -144,7 +144,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="bold"] .card.util .wm{color:#1D1D1F}
 .stage[data-look="bold"] .circ{background:rgba(255,255,255,.18);color:#fff}
 .stage[data-look="bold"] .circ.on{background:#fff;color:var(--a)}
-.stage[data-look="bold"] .tile{background:rgba(255,255,255,.18);color:#fff;border-radius:26px}
+.stage[data-look="bold"] .tile{background:rgba(255,255,255,.18);color:#fff;border-radius:34px}
 .stage[data-look="bold"] .label{font-weight:700;font-size:44px}
 
 /* grade */
@@ -169,17 +169,16 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       <div class="bg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
       <section class="screen home-screen" id="home">
-        <div class="circles" id="circH"></div>
-        <div class="clock" id="clock"></div>
         <div class="date" id="date"></div>
-        <div class="wx" id="wx">Colméia-TO, 29°C</div>
+        <div class="clock" id="clock"></div>
+        <div class="sys" id="circH"></div>
         <div class="label hlabel" id="hlabel"></div>
         <div class="strip" id="strip"></div>
       </section>
 
       <section class="screen grid-screen" id="gridscr">
+        <div class="side" id="circG"></div>
         <div class="gwrap" id="gwrap">
-          <div class="circles" id="circG"></div>
           <div class="label glabel" id="glabel"></div>
         </div>
       </section>
@@ -276,6 +275,10 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       line:'<g '+L+'><path d="M4 7h3.2M14.6 7H20M4 12h9.4M19 12h1M4 17h2M12.2 17H20"/><circle cx="11" cy="7" r="2.4"/><circle cx="16.4" cy="12" r="2.4"/><circle cx="9" cy="17" r="2.4"/></g>',
       solid:'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" opacity=".4"/></g><circle cx="11" cy="7" r="3" fill="currentColor"/><circle cx="16.4" cy="12" r="3" fill="currentColor"/><circle cx="9" cy="17" r="3" fill="currentColor"/>'
     },
+    bluetooth:{
+      line:'<g '+L+'><path d="M7 8l10 8-5 5V3l5 5-10 8"/></g>',
+      solid:'<g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l10 8-5 5V3l5 5-10 8"/></g>'
+    },
     plus:{
       line:'<g '+L+'><path d="M12 5v14M5 12h14"/></g>',
       solid:'<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>'
@@ -286,6 +289,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     {k:'theme',    n:'Tema'},
     {k:'boost',    n:'Acelerador'},
     {k:'hdmi',     n:'HDMI'},
+    {k:'bluetooth',n:'Bluetooth'},
     {k:'settings', n:'Configurações'}
   ];
   function svg(k, style){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k][style] + '</svg>'; }
@@ -293,7 +297,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   /* ---------- estado ---------- */
   var S = { look:'clean', theme:'light', icons:'line', view:'home',
             zone:'strip', i:0,      // home: 'strip' | 'circles'
-            gi:0, ci:2, scroll:0, gscroll:0, offMin:0 };
+            gi:0, ci:4, si:0, scroll:0, gscroll:0, offMin:0, pos:[] };
 
   /* ---------- relógio de placas ---------- */
   var clock = $('#clock'), tiles = [], shown = ['','','',''];
@@ -312,7 +316,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     });
     var wd = cap(now.toLocaleDateString('pt-BR', {weekday:'long'}));
     var mo = cap(now.toLocaleDateString('pt-BR', {month:'long'}));
-    $('#date').textContent = wd + ', ' + now.getDate() + ' de ' + mo;
+    $('#date').textContent = wd + ', ' + now.getDate() + ' de ' + mo + ' de ' + now.getFullYear() + ' em Colméia-TO, 29°C';
   }
   tick(true); setInterval(function(){ tick(false); }, 5000);
 
@@ -370,6 +374,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   function layoutStrip(){
     var x = 0, pos = [];
     items.forEach(function(it, k){ var w = (S.zone === 'strip' && k === S.i) ? W_ON : W; pos.push([x, w]); x += w + GAP; });
+    S.pos = pos;
     var f = pos[S.i], sc = S.scroll;
     if (f[0] + f[1] > sc + 1704) sc = f[0] + f[1] - 1704 + GAP;
     if (f[0] < sc) sc = Math.max(0, f[0] - GAP);
@@ -383,26 +388,29 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     lb.style.left = (108 + f[0] - sc) + 'px';
     lb.style.opacity = S.zone === 'strip' ? 1 : 0;
   }
+  var COLS = 4, RIGHT = 1812, ROW0 = 186, PITCH = 366;
   function layoutGrid(){
-    var rows = Math.ceil(APPS.length / 5);
+    var rows = Math.ceil(APPS.length / COLS);
     for (var r = 0; r < rows; r++){
-      var idx = []; for (var k = r * 5; k < Math.min(APPS.length, r * 5 + 5); k++) idx.push(k);
+      var idx = []; for (var k = r * COLS; k < Math.min(APPS.length, r * COLS + COLS); k++) idx.push(k);
       var ws = idx.map(function(k){ return (S.view === 'grid' && S.zone === 'grid' && k === S.gi) ? W_ON : W; });
       var total = ws.reduce(function(a, b){ return a + b; }, 0) + GAP * (idx.length - 1);
-      var x = (1920 - total) / 2;
+      var x = RIGHT - total;                       // fileiras alinhadas à direita (design/v3)
       idx.forEach(function(k, j){
         var el = gridEls[k];
-        el.style.left = x + 'px'; el.style.width = ws[j] + 'px'; el.style.top = (292 + r * 364) + 'px';
+        el.style.left = x + 'px'; el.style.width = ws[j] + 'px'; el.style.top = (ROW0 + r * PITCH) + 'px';
         el.classList.toggle('on', S.zone === 'grid' && k === S.gi);
         x += ws[j] + GAP;
       });
     }
-    var fr = Math.floor(S.gi / 5), top = 292 + fr * 364, sy = S.gscroll;
-    if (S.zone === 'circles') sy = 0;
-    else { if (top - sy < 250) sy = Math.max(0, top - 250); if (top + 256 - sy > 990) sy = top + 256 - 990; }
+    var fr = Math.floor(S.gi / COLS), top = ROW0 + fr * PITCH, sy = S.gscroll;
+    if (S.zone === 'grid'){
+      if (top - sy < ROW0) sy = Math.max(0, top - ROW0);
+      if (top + 256 - sy > 990) sy = top + 256 - 990;
+    }
     S.gscroll = sy; gwrap.style.transform = 'translateY(' + (-sy) + 'px)';
     var gl = $('#glabel'), cx = parseFloat(gridEls[S.gi].style.left) || 0;
-    gl.textContent = APPS[S.gi].n; gl.style.left = cx + 'px'; gl.style.top = (292 + fr * 364 - 76) + 'px';
+    gl.textContent = APPS[S.gi].n; gl.style.left = cx + 'px'; gl.style.top = (top - 76) + 'px';
     gl.style.opacity = S.zone === 'grid' ? 1 : 0;
   }
   function paint(){
@@ -411,10 +419,8 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     if (S.view === 'home' && S.zone === 'strip' && items[S.i].type === 'app') cur = items[S.i].app;
     if (S.view === 'grid' && S.zone === 'grid') cur = APPS[S.gi];
     if (cur){ stage.style.setProperty('--a', cur.c1); stage.style.setProperty('--a2', cur.c2); }
-    ['H','G'].forEach(function(key){
-      var active = (key === 'H') === (S.view === 'home');
-      circEls[key].forEach(function(b, idx){ b.classList.toggle('on', active && S.zone === 'circles' && idx === S.ci); });
-    });
+    circEls.H.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'home' && S.zone === 'circles' && idx === S.ci); });
+    circEls.G.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'grid' && S.zone === 'side' && idx === S.si); });
     layoutStrip(); layoutGrid();
     seg('#sLook', S.look); seg('#sTheme', S.theme); seg('#sIcons', S.icons); seg('#sView', S.view);
   }
@@ -436,10 +442,12 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     else if (k === 'theme') setTheme(S.theme === 'light' ? 'dark' : 'light');
     else if (k === 'boost') toast('Memória liberada: 118 MB');
     else if (k === 'hdmi') toast('HDMI 1 · HDMI 2 · AV');
+    else if (k === 'bluetooth') toast('Abre o Bluetooth da TV');
     else toast('Abre as Configurações da TV');
   }
   function tapCircle(idx){
-    S.zone = 'circles'; S.ci = idx; paint();
+    if (S.view === 'home'){ S.zone = 'circles'; S.ci = idx; } else { S.zone = 'side'; S.si = idx; }
+    paint();
     var b = circEls[S.view === 'home' ? 'H' : 'G'][idx];
     b.classList.add('pressed'); setTimeout(function(){ b.classList.remove('pressed'); }, 140);
     circleAction(idx);
@@ -459,29 +467,45 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       if (S.zone === 'strip'){
         if (k === 'left') S.i = Math.max(0, S.i - 1);
         else if (k === 'right') S.i = Math.min(items.length - 1, S.i + 1);
-        else if (k === 'up'){ S.zone = 'circles'; S.ci = 2; }
+        else if (k === 'up'){                      // sobe pro bloco 2x3, na coluna mais perto do card
+          var p = S.pos[S.i], cx = 108 + p[0] - S.scroll + p[1] / 2;
+          S.zone = 'circles'; S.ci = 4 + (cx > 1418 ? 1 : 0);
+        }
         else if (k === 'ok') return activateStrip();
       } else {
-        if (k === 'left') S.ci = Math.max(0, S.ci - 1);
-        else if (k === 'right') S.ci = Math.min(4, S.ci + 1);
-        else if (k === 'down') S.zone = 'strip';
+        var c = S.ci % 2, r = Math.floor(S.ci / 2);
+        if (k === 'left' && c > 0) S.ci--;
+        else if (k === 'right' && c < 1) S.ci++;
+        else if (k === 'up' && r > 0) S.ci -= 2;
+        else if (k === 'down'){ if (r < 2) S.ci += 2; else S.zone = 'strip'; }
         else if (k === 'ok') return circleAction(S.ci);
       }
     } else {
       if (k === 'back') return setView('home');
       if (S.zone === 'grid'){
-        var c = S.gi % 5, r = Math.floor(S.gi / 5);
-        if (k === 'left' && c > 0) S.gi--;
-        else if (k === 'right' && S.gi < APPS.length - 1 && c < 4) S.gi++;
-        else if (k === 'down' && S.gi + 5 < APPS.length) S.gi += 5;
-        else if (k === 'down' && r < Math.floor((APPS.length - 1) / 5)) S.gi = APPS.length - 1;
-        else if (k === 'up'){ if (r === 0){ S.zone = 'circles'; S.ci = Math.min(4, c); } else S.gi -= 5; }
+        var gc = S.gi % COLS, gr = Math.floor(S.gi / COLS), lastRow = Math.floor((APPS.length - 1) / COLS);
+        if (k === 'left'){
+          if (gc > 0) S.gi--;
+          else {                                    // vai pra coluna lateral, no botão mais perto da altura do card
+            var cy = ROW0 + gr * PITCH + 128 - S.gscroll, best = 0, bd = 1e9;
+            for (var q = 0; q < 6; q++){ var d = Math.abs(240 + q * 105.2 + 38 - cy); if (d < bd){ bd = d; best = q; } }
+            S.zone = 'side'; S.si = best;
+          }
+        }
+        else if (k === 'right' && S.gi < APPS.length - 1 && gc < COLS - 1) S.gi++;
+        else if (k === 'down' && S.gi + COLS < APPS.length) S.gi += COLS;
+        else if (k === 'down' && gr < lastRow) S.gi = APPS.length - 1;
+        else if (k === 'up' && gr > 0) S.gi -= COLS;
         else if (k === 'ok') return toast('Abrir ' + APPS[S.gi].n);
       } else {
-        if (k === 'left') S.ci = Math.max(0, S.ci - 1);
-        else if (k === 'right') S.ci = Math.min(4, S.ci + 1);
-        else if (k === 'down'){ S.zone = 'grid'; S.gi = Math.min(S.ci, APPS.length - 1); }
-        else if (k === 'ok') return circleAction(S.ci);
+        if (k === 'up') S.si = Math.max(0, S.si - 1);
+        else if (k === 'down') S.si = Math.min(5, S.si + 1);
+        else if (k === 'right'){                   // volta pra grade, na fileira mais perto do botão
+          var by = 240 + S.si * 105.2 + 38, row = Math.round((by - 128 - ROW0 + S.gscroll) / PITCH);
+          row = Math.max(0, Math.min(Math.floor((APPS.length - 1) / COLS), row));
+          S.zone = 'grid'; S.gi = Math.min(APPS.length - 1, row * COLS);
+        }
+        else if (k === 'ok') return circleAction(S.si);
       }
     }
     paint();
