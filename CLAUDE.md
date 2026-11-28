@@ -44,7 +44,7 @@
   uso pessoal neste launcher; não redistribuir como produto.
 - Têm logo próprio: Netflix, Prime Video, YouTube, Google Play (Brandfetch) e CDNTV, MEGAFUT, Downloader e Globoplay (imagens que o
   Alex mandou; fontes em `design/logos/*-src.png`, vetorizadas com potrace em `design/logos/cdntv.svg`, `megafute.svg` e `downloader.svg`). Globoplay usa o logo empilhado (card quadrado) e o horizontal (banner), vermelho `#F50234`.
-  Alexa, Prime Video (empilhado no card, horizontal no banner) e Google Play (triângulo) vêm de SVGs do SVG Repo
+  Alexa (versão nova: "alexa" + sorriso, `alexa-mono.svg`/`alexa-color.svg` #008bd6, originais em `design/logos/drive/alexa/`), Prime Video (empilhado no card, horizontal no banner) e Google Play (triângulo) vêm de SVGs do SVG Repo/selfh.st
   que o Alex salvou no Google Drive (originais em `design/logos/drive/`; versões prontas `alexa.svg`,
   `prime-stacked.svg`, `prime-horizontal.svg`, `google-play-color.svg`, `google-play-mono.svg`).
   Sem logo utilizável: apps de sistema. Esses usam o ícone do app.
