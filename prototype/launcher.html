@@ -157,22 +157,12 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-logo="color"][data-look="clean"][data-cards="mono"] .glyph.logo .lc,.stage[data-logo="color"][data-look="frost"] .glyph.logo .lc{display:grid}
 
 /* ---- visual 1: Limpo ---- */
-.stage[data-look="clean"] .card{box-shadow:0 12px 32px rgba(0,0,0,.14)}
-.stage[data-look="clean"] .card.on{box-shadow:0 30px 70px rgba(0,0,0,.30)}
-.stage[data-look="clean"][data-theme="dark"] .card{box-shadow:0 12px 32px rgba(0,0,0,.6)}
-.stage[data-look="clean"] .circ{box-shadow:0 6px 18px rgba(0,0,0,.08)}
 
 /* tema do Limpo: claro = fundo branco + cards pretos; escuro = fundo preto + cards brancos */
 .stage[data-look="clean"][data-cards="mono"]{--bg:#FFFFFF;--card:#0B0B0D;--on-card:#FFFFFF;--text:#0B0B0D;--support:#6E6E73;--slit:#FFFFFF}
 .stage[data-look="clean"][data-cards="mono"][data-theme="dark"]{--bg:#000000;--card:#FFFFFF;--on-card:#0B0B0D;--text:#F5F5F7;--support:#98989D;--slit:#000000}
 .stage[data-look="clean"][data-cards="mono"] .card:not(.util){background:var(--card)}
 .stage[data-look="clean"][data-cards="mono"] .card:not(.util) .glyph{color:var(--c1)}
-.stage[data-look="clean"][data-cards="mono"] .card{box-shadow:0 14px 34px rgba(0,0,0,.26)}
-.stage[data-look="clean"][data-cards="mono"] .card.on{box-shadow:0 34px 76px rgba(0,0,0,.40)}
-.stage[data-look="clean"][data-cards="mono"] .circ{box-shadow:0 8px 22px rgba(0,0,0,.22)}
-.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .card{box-shadow:0 14px 40px rgba(255,255,255,.07)}
-.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .card.on{box-shadow:0 30px 80px rgba(255,255,255,.16)}
-.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .circ{box-shadow:0 8px 22px rgba(255,255,255,.06)}
 .stage[data-look="clean"][data-cards="mono"] .circ.on{background:var(--accent);color:#fff}
 
 /* ---- visuais 2 e 3: Vidro (só botões, placas e menus) e Vidro total (tudo de vidro). Fundo: LEDs desfocados ---- */
@@ -180,16 +170,16 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   --gl1:rgba(255,255,255,.46);--gl2:rgba(255,255,255,.12);--gl3:rgba(255,255,255,.26);--rim:rgba(255,255,255,.95);--edge:rgba(255,255,255,.55);background:#E7EAF4}
 .stage[data-look="glass"][data-theme="dark"]{--text:#F5F5F7;--support:#C4C9E6;--card:rgba(255,255,255,.1);--slit:rgba(255,255,255,.3);
   --gl1:rgba(255,255,255,.20);--gl2:rgba(255,255,255,.04);--gl3:rgba(255,255,255,.12);--rim:rgba(255,255,255,.55);--edge:rgba(255,255,255,.26);background:#04050B}
-.stage[data-look="glass"] .bg{background:#E7EAF4}
-.stage[data-look="glass"][data-theme="dark"] .bg{background:#04050B}
-.stage[data-look="glass"] .blob{opacity:.22}
-.stage[data-look="glass"][data-theme="dark"] .blob{opacity:.3}
+.stage[data-look="glass"] .bg,.stage[data-look="frost"] .bg{background:#E7EAF4}
+.stage[data-look="glass"][data-theme="dark"] .bg,.stage[data-look="frost"][data-theme="dark"] .bg{background:#04050B}
+.stage[data-look="glass"] .blob,.stage[data-look="frost"] .blob{opacity:.22}
+.stage[data-look="glass"][data-theme="dark"] .blob,.stage[data-look="frost"][data-theme="dark"] .blob{opacity:.3}
 .leds{position:absolute;inset:0;display:none;pointer-events:none}
-.stage[data-look="glass"] .leds{display:block}
+.stage[data-look="glass"] .leds,.stage[data-look="frost"] .leds{display:block}
 .led{position:absolute;border-radius:50%;background:var(--lc);filter:blur(var(--bl,16px));opacity:var(--o,.8);
   animation:drift var(--dur,12s) ease-in-out infinite alternate,twinkle var(--tw,5s) ease-in-out infinite alternate;transition:background-color .7s var(--smooth)}
-.stage[data-look="glass"] .led{opacity:calc(var(--o,.8)*.75)}
-.stage[data-look="glass"][data-theme="dark"] .led{mix-blend-mode:screen;opacity:var(--o,.8)}
+.stage[data-look="glass"] .led,.stage[data-look="frost"] .led{opacity:calc(var(--o,.8)*.75)}
+.stage[data-look="glass"][data-theme="dark"] .led,.stage[data-look="frost"][data-theme="dark"] .led{mix-blend-mode:screen;opacity:var(--o,.8)}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,12px),var(--dy,-18px))}}
 @keyframes twinkle{from{filter:blur(var(--bl,16px)) brightness(.75)}to{filter:blur(var(--bl,16px)) brightness(1.25)}}
 .stage[data-look="glass"] .date{color:var(--text);text-shadow:0 1px 10px rgba(255,255,255,.35)}
@@ -213,12 +203,8 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 46%)}
 .stage[data-look="glass"] .card.on{box-shadow:inset 0 2px 1px rgba(255,255,255,.55),0 30px 70px rgba(0,0,0,.36)}
 /* ---- visual 4: Vidro fosco (a primeira versão: película translúcida e fosca, manchas de cor do app no fundo) ---- */
-.stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E9ECF4}
-.stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#06070B}
-.stage[data-look="frost"] .bg{background:#E9ECF4}
-.stage[data-look="frost"][data-theme="dark"] .bg{background:#06070B}
-.stage[data-look="frost"] .blob{opacity:.55}
-.stage[data-look="frost"][data-theme="dark"] .blob{opacity:.5}
+.stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E7EAF4}
+.stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#04050B}
 .stage[data-look="frost"] .card:not(.util){background:rgba(255,255,255,.14);color:#fff;-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);border:1.5px solid rgba(255,255,255,.32)}
 .stage[data-look="frost"] .card:not(.util) .glyph{color:var(--c1);filter:saturate(1.2)}
 .stage[data-look="frost"][data-theme="dark"] .card:not(.util) .glyph{color:#fff}
@@ -248,7 +234,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="bold"] .card{border-radius:72px}
 .stage[data-look="bold"] .card:not(.on){background:rgba(255,255,255,.16)}
 .stage[data-look="bold"] .card .glyph{color:#fff}
-.stage[data-look="bold"] .card.on{background:#fff;box-shadow:0 34px 80px rgba(0,0,0,.35)}
+.stage[data-look="bold"] .card.on{background:#fff}
 .stage[data-look="bold"] .card:not(.util) .banner{background:#fff;align-items:flex-end}
 .stage[data-look="bold"] .card:not(.util) .wm{color:var(--c1);font-size:68px}
 .stage[data-look="bold"] .card:not(.util) .art{background:var(--c1);opacity:.14}
