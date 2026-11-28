@@ -41,10 +41,11 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   box-shadow:0 0 0 1px var(--page-line);container-type:size}
 .stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
   font-family:var(--font);color:var(--text);background:var(--bg);user-select:none;
-  --ease:cubic-bezier(.2,.8,.2,1);
-  --bg:#F5F5F7;--card:#FFFFFF;--text:#1D1D1F;--support:#86868B;--accent:#007AFF;--slit:#F5F5F7;
+  --ease:cubic-bezier(.2,.8,.2,1);--smooth:cubic-bezier(.32,.72,0,1);
+  --spring:cubic-bezier(.34,1.28,.64,1);--sp:.55s;   /* a mola real é calculada em JS (linear()) */
+  --bg:#F5F5F7;--card:#FFFFFF;--on-card:#1D1D1F;--text:#1D1D1F;--support:#86868B;--accent:#007AFF;--slit:#F5F5F7;
   --a:#6C4CF1;--a2:#2c1a8c}
-.stage[data-theme="dark"]{--bg:#000000;--card:#2C2C2E;--text:#F5F5F7;--support:#98989D;--accent:#0A84FF;--slit:#000000}
+.stage[data-theme="dark"]{--bg:#000000;--card:#2C2C2E;--on-card:#F5F5F7;--text:#F5F5F7;--support:#98989D;--accent:#0A84FF;--slit:#000000}
 .stage *{box-sizing:border-box}
 
 .bg{position:absolute;inset:0;transition:background-color .6s var(--ease);background:var(--bg);overflow:hidden}
@@ -53,59 +54,86 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .b2{width:900px;height:900px;left:-260px;top:420px;background:var(--a2)}
 .b3{width:700px;height:700px;left:620px;top:560px;background:var(--accent)}
 
-.screen{position:absolute;inset:0;transition:opacity .35s var(--ease),transform .45s var(--ease)}
-.stage[data-view="home"] .grid-screen{opacity:0;pointer-events:none;transform:scale(1.03)}
-.stage[data-view="grid"] .home-screen{opacity:0;pointer-events:none;transform:scale(.97)}
+.screen{position:absolute;inset:0;transition:opacity .45s var(--smooth),transform var(--sp) var(--spring),filter .45s var(--smooth)}
+.stage[data-view="home"] .grid-screen{opacity:0;pointer-events:none;transform:scale(1.06);filter:blur(14px)}
+.stage[data-view="grid"] .home-screen{opacity:0;pointer-events:none;transform:scale(.94);filter:blur(14px)}
+.stage[data-motion="simple"] .screen{filter:none!important}
 
 /* botões do sistema: bloco 2x3 na Home, coluna na Grade */
 .sys{position:absolute;left:1328px;top:170px;display:grid;grid-template-columns:repeat(2,76px);grid-auto-rows:76px;column-gap:28px;row-gap:29px}
 .side{position:absolute;left:108px;top:240px;display:flex;flex-direction:column;gap:29px}
 .circ{width:76px;height:76px;border-radius:24px;border:0;padding:0;display:grid;place-items:center;cursor:pointer;
-  background:var(--card);color:var(--text);transition:transform .22s var(--ease),background-color .22s,color .22s,box-shadow .22s}
+  background:var(--card);color:var(--on-card);transition:transform var(--sp) var(--spring),background-color .25s,color .25s,box-shadow .3s}
 .circ svg{width:36px;height:36px;display:block}
-.circ.on{background:var(--accent);color:#fff;transform:scale(1.14)}
-.circ.pressed{transform:scale(.94)}
+.circ.on{background:var(--accent);color:#fff;transform:scale(1.16)}
+.circ.pressed{transform:scale(.88);transition-duration:.09s}
 
 /* relógio de placas */
 .clock{position:absolute;left:414px;top:170px;display:flex}
-.tile{position:relative;width:206px;height:286px;border-radius:30px;background:var(--card);margin-left:14px;
-  display:grid;place-items:center;font-size:250px;font-weight:500;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.tile{position:relative;width:206px;height:286px;border-radius:30px;background:var(--card);color:var(--on-card);margin-left:14px;
+  display:grid;place-items:center;font-size:250px;font-weight:500;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums;
+  transform:perspective(900px) rotateX(0deg);transition:transform var(--sp) var(--spring)}
+.tile.out{transform:perspective(900px) rotateX(-90deg);transition:transform .15s cubic-bezier(.5,0,1,.6)}
+.tile.in{transform:perspective(900px) rotateX(90deg);transition:none}
 .tile:nth-child(3){margin-left:30px}.tile:first-child{margin-left:0}
 .tile::after{content:"";position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--slit)}
-.tile.flip{animation:flip .24s ease-in-out}
-@keyframes flip{0%{transform:scaleY(1)}50%{transform:scaleY(.02)}100%{transform:scaleY(1)}}
 .date{position:absolute;left:0;right:0;top:106px;text-align:center;font-size:28px;line-height:34px;color:var(--support);font-weight:400}
 
 /* faixa da home */
 .strip{position:absolute;left:108px;top:676px;width:1704px;height:380px;overflow:hidden}
 .strip .card{top:40px}
 .label{position:absolute;font-size:40px;line-height:40px;font-weight:500;letter-spacing:-.015em;white-space:nowrap;
-  transition:left .26s var(--ease),top .26s var(--ease),opacity .2s}
+  transition:left var(--sp) var(--spring),top var(--sp) var(--spring),opacity .2s}
+@keyframes swapIn{from{opacity:0;transform:translateY(12px);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+.label.swap{animation:swapIn .42s var(--smooth)}
 .hlabel{top:641px}
 
 /* cards */
 .card{position:absolute;height:256px;width:256px;border-radius:48px;overflow:hidden;cursor:pointer;color:#fff;background:var(--c1);
   display:grid;place-items:center;
-  transition:left .26s var(--ease),width .26s var(--ease),top .26s var(--ease),box-shadow .26s,background-color .26s,border-color .26s}
+  transition:left var(--sp) var(--spring),width var(--sp) var(--spring),top var(--sp) var(--spring),transform var(--sp) var(--spring),
+    box-shadow .45s var(--smooth),background-color .26s,border-color .26s}
+.card.on{transform:translateY(-10px)}
+@keyframes arrive{from{transform:perspective(900px) translateY(-3px) rotateY(var(--tilt,0deg)) scale(.97)}
+  to{transform:perspective(900px) translateY(-10px) rotateY(0deg) scale(1)}}
+.card.arrive{animation:arrive var(--sp) var(--spring)}
+.stage[data-motion="simple"] .card.arrive{animation:none}
 .card .glyph{font-size:100px;font-weight:600;letter-spacing:-.03em;transition:opacity .18s;line-height:1}
 .card .glyph svg{width:108px;height:108px;display:block}
 .card .banner{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:30px 38px;opacity:0;transition:opacity .22s;
   background:linear-gradient(135deg,var(--c1),var(--c2))}
-.card .wm{font-size:58px;font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap}
-.card .art{position:absolute;right:-40px;top:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.14)}
+.card .wm{font-size:58px;font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap;
+  transform:translateY(18px);opacity:0;transition:transform var(--sp) var(--spring),opacity .3s}
+.card.on .wm{transform:none;opacity:1}
+.card .art{position:absolute;right:-40px;top:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.14);
+  transform:translate(30px,-22px) scale(.88);transition:transform calc(var(--sp)*1.5) var(--spring)}
+.card.on .art{transform:none}
 .card.on .banner{opacity:1}.card.on .glyph{opacity:0}
 .card .dot{position:absolute;right:22px;top:22px;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px #fff}
-.card.util{background:var(--card);color:var(--text)}
+.card.util{background:var(--card);color:var(--on-card)}
 .card.util .banner{background:var(--card);align-items:center;justify-content:flex-start;gap:26px}
-.card.util .banner svg{width:96px;height:96px;flex:none;color:var(--support)}
-.card.util .wm{font-size:46px;font-weight:600;color:var(--text)}
-.card.util .glyph{color:var(--support)}
+.card.util .banner svg{width:96px;height:96px;flex:none;color:var(--on-card);opacity:.7}
+.card.util .wm{font-size:46px;font-weight:600;color:var(--on-card)}
+.card.util .glyph{color:var(--on-card);opacity:.7}
 
 /* ---- visual 1: Limpo ---- */
 .stage[data-look="clean"] .card{box-shadow:0 12px 32px rgba(0,0,0,.14)}
 .stage[data-look="clean"] .card.on{box-shadow:0 30px 70px rgba(0,0,0,.30)}
 .stage[data-look="clean"][data-theme="dark"] .card{box-shadow:0 12px 32px rgba(0,0,0,.6)}
 .stage[data-look="clean"] .circ{box-shadow:0 6px 18px rgba(0,0,0,.08)}
+
+/* tema do Limpo: claro = fundo branco + cards pretos; escuro = fundo preto + cards brancos */
+.stage[data-look="clean"][data-cards="mono"]{--bg:#FFFFFF;--card:#0B0B0D;--on-card:#FFFFFF;--text:#0B0B0D;--support:#6E6E73;--slit:#FFFFFF}
+.stage[data-look="clean"][data-cards="mono"][data-theme="dark"]{--bg:#000000;--card:#FFFFFF;--on-card:#0B0B0D;--text:#F5F5F7;--support:#98989D;--slit:#000000}
+.stage[data-look="clean"][data-cards="mono"] .card:not(.util){background:var(--card)}
+.stage[data-look="clean"][data-cards="mono"] .card:not(.util) .glyph{color:var(--c1)}
+.stage[data-look="clean"][data-cards="mono"] .card{box-shadow:0 14px 34px rgba(0,0,0,.26)}
+.stage[data-look="clean"][data-cards="mono"] .card.on{box-shadow:0 34px 76px rgba(0,0,0,.40)}
+.stage[data-look="clean"][data-cards="mono"] .circ{box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .card{box-shadow:0 14px 40px rgba(255,255,255,.07)}
+.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .card.on{box-shadow:0 30px 80px rgba(255,255,255,.16)}
+.stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .circ{box-shadow:0 8px 22px rgba(255,255,255,.06)}
+.stage[data-look="clean"][data-cards="mono"] .circ.on{background:var(--accent);color:#fff}
 
 /* ---- visual 2: Vidro (só botões, placas e menus; cards de app sólidos, como na dica do vídeo) ---- */
 .scene{position:absolute;inset:0;width:100%;height:100%;display:none}
@@ -161,12 +189,12 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="bold"] .label{font-weight:700;font-size:44px}
 
 /* grade */
-.gwrap{position:absolute;left:0;top:0;width:1920px;height:3000px;transition:transform .45s var(--ease)}
+.gwrap{position:absolute;left:0;top:0;width:1920px;height:3000px;transition:transform .6s var(--smooth)}
 .glabel{top:0}
 
-.toast{position:absolute;left:50%;bottom:40px;transform:translate(-50%,20px);opacity:0;padding:16px 30px;border-radius:999px;
-  font-size:26px;font-weight:500;background:rgba(20,20,22,.82);color:#fff;transition:opacity .2s,transform .3s var(--ease);pointer-events:none;z-index:5}
-.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast{position:absolute;left:50%;bottom:40px;transform:translate(-50%,26px) scale(.9);opacity:0;padding:16px 30px;border-radius:999px;
+  font-size:26px;font-weight:500;background:rgba(20,20,22,.82);color:#fff;transition:opacity .2s,transform var(--sp) var(--spring);pointer-events:none;z-index:5}
+.toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
 
 @media (prefers-reduced-motion: reduce){ .stage *{transition-duration:.01s!important;animation:none!important} }
 </style>
@@ -178,7 +206,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   </div>
 
   <div class="vp" id="vp">
-    <div class="stage" id="stage" data-look="clean" data-theme="light" data-view="home">
+    <div class="stage" id="stage" data-look="clean" data-theme="light" data-view="home" data-cards="mono" data-motion="spring">
       <div class="bg">
         <svg class="scene" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
@@ -246,6 +274,16 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
         <button data-v="home" aria-pressed="true">Home</button>
         <button data-v="grid" aria-pressed="false">Grade</button>
       </div></div>
+    <div class="grp"><span>Cards (Limpo)</span>
+      <div class="seg" id="sCards">
+        <button data-v="mono" aria-pressed="true">Preto e branco</button>
+        <button data-v="color" aria-pressed="false">Cor do app</button>
+      </div></div>
+    <div class="grp"><span>Animação</span>
+      <div class="seg" id="sMotion">
+        <button data-v="spring" aria-pressed="true">Apple (mola)</button>
+        <button data-v="simple" aria-pressed="false">Simples</button>
+      </div></div>
     <div class="grp"><span>Relógio</span>
       <div class="seg"><button id="bFlip" aria-pressed="false">Virar minuto</button></div></div>
     <div class="grp"><span>Controle</span>
@@ -264,6 +302,22 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 (function(){
   var $ = function(s){ return document.querySelector(s); };
   var stage = $('#stage'), vp = $('#vp');
+
+  /* ---------- mola estilo Apple: curva calculada de uma mola amortecida ---------- */
+  var SPRING = (function(){
+    var k = 260, c = 22, m = 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m)), wd = w0 * Math.sqrt(1 - z * z);
+    function pos(t){ return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+    var T = 0; for (var t = 0; t < 3; t += 0.005){ if (Math.abs(1 - pos(t)) > 0.002) T = t; } T += 0.02;
+    var n = 36, pts = []; for (var i = 0; i <= n; i++) pts.push(pos(T * i / n).toFixed(3));
+    pts[0] = '0'; pts[n] = '1';
+    return { css: 'linear(' + pts.join(',') + ')', dur: T.toFixed(2) + 's' };
+  })();
+  var CAN_SPRING = !!(window.CSS && CSS.supports && CSS.supports('transition-timing-function', 'linear(0,1)'));
+  function applyMotion(){
+    if (S.motion === 'spring' && CAN_SPRING){ stage.style.setProperty('--spring', SPRING.css); stage.style.setProperty('--sp', SPRING.dur); }
+    else if (S.motion === 'spring'){ stage.style.setProperty('--spring', 'cubic-bezier(.34,1.28,.64,1)'); stage.style.setProperty('--sp', '.55s'); }
+    else { stage.style.setProperty('--spring', 'cubic-bezier(.2,.8,.2,1)'); stage.style.setProperty('--sp', '.28s'); }
+  }
 
   /* ---------- escala do palco ---------- */
   function fit(){ stage.style.transform = 'scale(' + (vp.clientWidth / 1920) + ')'; }
@@ -332,7 +386,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   function svg(k, style){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k][style] + '</svg>'; }
 
   /* ---------- estado ---------- */
-  var S = { look:'clean', theme:'light', icons:'line', view:'home',
+  var S = { look:'clean', theme:'light', icons:'line', view:'home', cards:'mono', motion:'spring', dir:0,
             zone:'strip', i:0,      // home: 'strip' | 'circles'
             gi:0, ci:4, si:0, scroll:0, gscroll:0, offMin:0, pos:[] };
 
@@ -348,8 +402,13 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       if (shown[i] === ch) return;
       var was = shown[i]; shown[i] = ch;
       if (first || !was){ tiles[i].textContent = ch; return; }
-      tiles[i].classList.remove('flip'); void tiles[i].offsetWidth; tiles[i].classList.add('flip');
-      setTimeout(function(){ tiles[i].textContent = ch; }, 120);
+      var tl = tiles[i];
+      tl.classList.add('out');                         // a placa vira pra frente (cai)
+      setTimeout(function(){
+        tl.textContent = ch;
+        tl.classList.remove('out'); tl.classList.add('in'); void tl.offsetWidth;   // volta por baixo
+        tl.classList.remove('in');                     // e assenta com a mola
+      }, 150);
     });
     var wd = cap(now.toLocaleDateString('pt-BR', {weekday:'long'}));
     var mo = cap(now.toLocaleDateString('pt-BR', {month:'long'}));
@@ -452,6 +511,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   }
   function paint(){
     stage.dataset.look = S.look; stage.dataset.theme = S.theme; stage.dataset.view = S.view;
+    stage.dataset.cards = S.cards; stage.dataset.motion = S.motion; applyMotion();
     var cur = null;
     if (S.view === 'home' && S.zone === 'strip' && items[S.i].type === 'app') cur = items[S.i].app;
     if (S.view === 'grid' && S.zone === 'grid') cur = APPS[S.gi];
@@ -459,7 +519,22 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     circEls.H.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'home' && S.zone === 'circles' && idx === S.ci); });
     circEls.G.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'grid' && S.zone === 'side' && idx === S.si); });
     layoutStrip(); layoutGrid();
-    seg('#sLook', S.look); seg('#sTheme', S.theme); seg('#sIcons', S.icons); seg('#sView', S.view);
+    seg('#sLook', S.look); seg('#sTheme', S.theme); seg('#sIcons', S.icons); seg('#sView', S.view); seg('#sCards', S.cards); seg('#sMotion', S.motion);
+    arrive();
+  }
+  var lastFocusKey = '';
+  function arrive(){
+    var idx = S.view === 'home' ? (S.zone === 'strip' ? S.i : 'c' + S.ci) : (S.zone === 'grid' ? S.gi : 's' + S.si);
+    var key = S.view + ':' + S.zone + ':' + idx;
+    if (key === lastFocusKey) return; lastFocusKey = key;
+    var el = null, lb = null;
+    if (S.view === 'home' && S.zone === 'strip'){ el = stripEls[S.i]; lb = $('#hlabel'); }
+    if (S.view === 'grid' && S.zone === 'grid'){ el = gridEls[S.gi]; lb = $('#glabel'); }
+    if (el && S.motion === 'spring'){
+      el.style.setProperty('--tilt', (S.dir * -8) + 'deg');
+      el.classList.remove('arrive'); void el.offsetWidth; el.classList.add('arrive');
+    }
+    if (lb){ lb.classList.remove('swap'); void lb.offsetWidth; lb.classList.add('swap'); }
   }
   function seg(sel, v){ document.querySelectorAll(sel + ' button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'); }); }
 
@@ -500,6 +575,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 
   /* ---------- navegação (setas / OK / Voltar) ---------- */
   function key(k){
+    S.dir = k === 'right' ? 1 : k === 'left' ? -1 : 0;
     if (S.view === 'home'){
       if (S.zone === 'strip'){
         if (k === 'left') S.i = Math.max(0, S.i - 1);
@@ -562,6 +638,8 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   bind('#sTheme', function(v){ setTheme(v); });
   bind('#sIcons', function(v){ S.icons = v; refreshIcons(); paint(); });
   bind('#sView', function(v){ setView(v); });
+  bind('#sCards', function(v){ S.cards = v; paint(); });
+  bind('#sMotion', function(v){ S.motion = v; paint(); });
   $('#bFlip').addEventListener('click', function(){ S.offMin += 1; tick(false); });
 
   paint();
