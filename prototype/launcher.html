@@ -167,19 +167,16 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 
 /* ---- visuais 2 e 3: Vidro (só botões, placas e menus) e Vidro total (tudo de vidro). Fundo: LEDs desfocados ---- */
 .stage[data-look="glass"]{--text:#10213d;--support:#34476b;--card:rgba(255,255,255,.2);--slit:rgba(255,255,255,.55);
-  --gl1:rgba(255,255,255,.46);--gl2:rgba(255,255,255,.12);--gl3:rgba(255,255,255,.26);--rim:rgba(255,255,255,.95);--edge:rgba(255,255,255,.55);background:#E7EAF4}
+  --gl1:rgba(255,255,255,.46);--gl2:rgba(255,255,255,.12);--gl3:rgba(255,255,255,.26);--rim:rgba(255,255,255,.95);--edge:rgba(255,255,255,.55);background:#E9ECF4}
 .stage[data-look="glass"][data-theme="dark"]{--text:#F5F5F7;--support:#C4C9E6;--card:rgba(255,255,255,.1);--slit:rgba(255,255,255,.3);
-  --gl1:rgba(255,255,255,.20);--gl2:rgba(255,255,255,.04);--gl3:rgba(255,255,255,.12);--rim:rgba(255,255,255,.55);--edge:rgba(255,255,255,.26);background:#04050B}
-.stage[data-look="glass"] .bg,.stage[data-look="frost"] .bg{background:#E7EAF4}
-.stage[data-look="glass"][data-theme="dark"] .bg,.stage[data-look="frost"][data-theme="dark"] .bg{background:#04050B}
-.stage[data-look="glass"] .blob,.stage[data-look="frost"] .blob{opacity:.22}
-.stage[data-look="glass"][data-theme="dark"] .blob,.stage[data-look="frost"][data-theme="dark"] .blob{opacity:.3}
+  --gl1:rgba(255,255,255,.20);--gl2:rgba(255,255,255,.04);--gl3:rgba(255,255,255,.12);--rim:rgba(255,255,255,.55);--edge:rgba(255,255,255,.26);background:#06070B}
+.stage[data-look="glass"] .bg,.stage[data-look="frost"] .bg{background:#E9ECF4}
+.stage[data-look="glass"][data-theme="dark"] .bg,.stage[data-look="frost"][data-theme="dark"] .bg{background:#06070B}
+.stage[data-look="glass"] .blob,.stage[data-look="frost"] .blob{opacity:.55}
+.stage[data-look="glass"][data-theme="dark"] .blob,.stage[data-look="frost"][data-theme="dark"] .blob{opacity:.5}
 .leds{position:absolute;inset:0;display:none;pointer-events:none}
-.stage[data-look="glass"] .leds,.stage[data-look="frost"] .leds{display:block}
 .led{position:absolute;border-radius:50%;background:var(--lc);filter:blur(var(--bl,16px));opacity:var(--o,.8);
   animation:drift var(--dur,12s) ease-in-out infinite alternate,twinkle var(--tw,5s) ease-in-out infinite alternate;transition:background-color .7s var(--smooth)}
-.stage[data-look="glass"] .led,.stage[data-look="frost"] .led{opacity:calc(var(--o,.8)*.75)}
-.stage[data-look="glass"][data-theme="dark"] .led,.stage[data-look="frost"][data-theme="dark"] .led{mix-blend-mode:screen;opacity:var(--o,.8)}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,12px),var(--dy,-18px))}}
 @keyframes twinkle{from{filter:blur(var(--bl,16px)) brightness(.75)}to{filter:blur(var(--bl,16px)) brightness(1.25)}}
 .stage[data-look="glass"] .date{color:var(--text);text-shadow:0 1px 10px rgba(255,255,255,.35)}
@@ -190,6 +187,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   -webkit-backdrop-filter:blur(16px) saturate(1.9) brightness(1.06);backdrop-filter:blur(16px) saturate(1.9) brightness(1.06);
   border:1px solid var(--edge);color:var(--text);
   box-shadow:inset 0 2px 1px var(--rim),inset 0 -2px 3px rgba(255,255,255,.2),inset 0 0 26px rgba(255,255,255,.16),0 18px 42px rgba(10,20,60,.22)}
+.stage[data-look="glass"] .tile{box-shadow:inset 0 2px 1px var(--rim),inset 0 -2px 3px rgba(255,255,255,.2),inset 0 0 26px rgba(255,255,255,.16)}
 .stage[data-look="glass"] .tile::after{background:var(--slit);box-shadow:0 1px 0 rgba(0,0,0,.12)}
 .stage[data-look="glass"] .card.util .banner{background:transparent}
 .stage[data-look="glass"] .card.util .wm,.stage[data-look="glass"] .card.util .glyph,.stage[data-look="glass"] .card.util .banner svg{color:var(--text)}
@@ -203,8 +201,8 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 46%)}
 .stage[data-look="glass"] .card.on{box-shadow:inset 0 2px 1px rgba(255,255,255,.55),0 30px 70px rgba(0,0,0,.36)}
 /* ---- visual 4: Vidro fosco (a primeira versão: película translúcida e fosca, manchas de cor do app no fundo) ---- */
-.stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E7EAF4}
-.stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#04050B}
+.stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E9ECF4}
+.stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#06070B}
 .stage[data-look="frost"] .card:not(.util){background:rgba(255,255,255,.14);color:#fff;-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);border:1.5px solid rgba(255,255,255,.32)}
 .stage[data-look="frost"] .card:not(.util) .glyph{color:var(--c1);filter:saturate(1.2)}
 .stage[data-look="frost"][data-theme="dark"] .card:not(.util) .glyph{color:#fff}
