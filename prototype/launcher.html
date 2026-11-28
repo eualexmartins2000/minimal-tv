@@ -188,6 +188,13 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .banner{background:transparent}
 .stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .glyph.logo,.stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .wm{color:var(--text)}
 .stage[data-look="glass"][data-gcards="clear"] .card.on:not(.util){background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.06));border-color:var(--rim)}
+/* Vidro escuro: preto chapado, só uma luz cinza subindo de baixo, e vidro discreto (borda fina, quase sem brilho) */
+.stage[data-look="glass"][data-theme="dark"]{--gl1:rgba(255,255,255,.07);--gl2:rgba(255,255,255,.03);--gl3:rgba(255,255,255,.05);--rim:rgba(255,255,255,.16);--edge:rgba(255,255,255,.10);--slit:rgba(255,255,255,.12);background:#000}
+.stage[data-look="glass"][data-theme="dark"] .bg{background:linear-gradient(0deg,#25272D 0%,#0B0B0D 38%,#000 62%)}
+.stage[data-look="glass"][data-theme="dark"] .blob{opacity:0}
+.stage[data-look="glass"][data-theme="dark"] .circ,.stage[data-look="glass"][data-theme="dark"] .tile,.stage[data-look="glass"][data-theme="dark"] .card.util,.stage[data-look="glass"][data-theme="dark"][data-gcards="clear"] .card:not(.util){
+  -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.stage[data-look="glass"][data-theme="dark"][data-gcards="clear"] .card.on:not(.util){background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.05));border-color:rgba(255,255,255,.4)}
 /* ---- visual 4: Vidro fosco (a primeira versão: película translúcida e fosca, manchas de cor do app no fundo) ---- */
 .stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E9ECF4}
 .stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#06070B}

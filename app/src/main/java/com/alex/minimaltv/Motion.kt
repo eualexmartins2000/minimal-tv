@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.Shader
@@ -50,7 +51,7 @@ object Motion {
  * Fundo do tema Vidro: três manchas de cor suaves (círculos com degradê radial, sem desfoque de verdade,
  * então é leve pra TV). As cores acompanham o app focado, com transição suave.
  */
-class AuraView(ctx: Context, private val strength: Float) : View(ctx) {
+class AuraView(ctx: Context, private val strength: Float, private val floorGlow: Boolean = false) : View(ctx) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val eval = ArgbEvaluator()
     private var from = intArrayOf(0, 0, 0)
@@ -87,6 +88,13 @@ class AuraView(ctx: Context, private val strength: Float) : View(ctx) {
     }
 
     override fun onDraw(c: Canvas) {
+        if (floorGlow) {
+            // Escuro: preto chapado com só uma luz cinza subindo de baixo
+            paint.shader = LinearGradient(0f, height.toFloat(), 0f, height * 0.38f,
+                intArrayOf(Color.rgb(37, 39, 45), Color.rgb(11, 11, 13), Color.BLACK), floatArrayOf(0f, 0.45f, 1f), Shader.TileMode.CLAMP)
+            c.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+            return
+        }
         val s = width / 1920f
         blob(c, 1500 * s, 170 * s, 600 * s, cur[0])
         blob(c, 190 * s, 870 * s, 540 * s, cur[1])

@@ -56,13 +56,13 @@ class MainActivity : Activity() {
     private fun applyPalette() {
         fun c(h: String) = Color.parseColor(h)
         fun w(a: Float) = Color.argb((a * 255).roundToInt(), 255, 255, 255)
-        BASE = c(if (dark) "#06070B" else "#E9ECF4")
+        BASE = c(if (dark) "#000000" else "#E9ECF4")
         CARD = c(if (dark) "#2C2C2E" else "#FFFFFF")
         TEXT = c(if (dark) "#D6D8E0" else "#10213D")      // escuro: branco apagado (menos luz na TV)
         SUPPORT = c(if (dark) "#9EA3BF" else "#34476B")
         ACCENT = c(if (dark) "#0A84FF" else "#007AFF")
         // Manchas mais fracas que no protótipo: a TV mostra áreas coloridas grandes bem mais claras que o monitor
-        if (dark) { GL1 = w(.16f); GL2 = w(.03f); GL3 = w(.09f); EDGE = w(.20f); SLIT = w(.24f); auraStrength = .13f }
+        if (dark) { GL1 = w(.07f); GL2 = w(.03f); GL3 = w(.05f); EDGE = w(.10f); SLIT = w(.12f); auraStrength = 0f }
         else { GL1 = w(.46f); GL2 = w(.12f); GL3 = w(.26f); EDGE = w(.55f); SLIT = w(.55f); auraStrength = .42f }
     }
 
@@ -166,7 +166,7 @@ class MainActivity : Activity() {
 
         root = FrameLayout(this).apply { setBackgroundColor(BASE) }
         setContentView(root)
-        aura = AuraView(this, auraStrength)
+        aura = AuraView(this, auraStrength, floorGlow = dark)
         root.addView(aura, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         setAura(Color.parseColor("#6C4CF1"), Color.parseColor("#2C1A8C"), false)
         home = layer()
@@ -976,9 +976,9 @@ class MainActivity : Activity() {
 
     /** Placa de vidro em foco: mais clara e com a borda forte (os cards transparentes precisam mostrar o foco). */
     private fun glassOn(radius: Float) =
-        GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(Color.argb(if (dark) 46 else 120, 255, 255, 255), Color.argb(if (dark) 14 else 50, 255, 255, 255))).apply {
+        GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(Color.argb(if (dark) 30 else 120, 255, 255, 255), Color.argb(if (dark) 12 else 50, 255, 255, 255))).apply {
             cornerRadius = radius
-            setStroke(max(1, px(2)), Color.argb(if (dark) 150 else 230, 255, 255, 255))
+            setStroke(max(1, px(2)), Color.argb(if (dark) 100 else 230, 255, 255, 255))
         }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
