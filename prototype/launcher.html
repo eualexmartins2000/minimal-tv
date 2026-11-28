@@ -153,7 +153,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="clean"][data-cards="mono"] .card:not(.util) .glyph{color:var(--c1)}
 .stage[data-look="clean"][data-cards="mono"] .circ.on{background:var(--accent);color:#fff}
 
-/* ---- visuais 2 e 3: Vidro (só botões, placas e menus) e Vidro total (tudo de vidro). Fundo: LEDs desfocados ---- */
+/* ---- visuais 2 e 3: Vidro (só botões, placas e menus) e Vidro total (tudo de vidro). Fundo: manchas suaves ---- */
 .stage[data-look="glass"]{--text:#10213d;--support:#34476b;--card:rgba(255,255,255,.2);--slit:rgba(255,255,255,.55);
   --gl1:rgba(255,255,255,.46);--gl2:rgba(255,255,255,.12);--gl3:rgba(255,255,255,.26);--rim:rgba(255,255,255,.95);--edge:rgba(255,255,255,.55);background:#E9ECF4}
 .stage[data-look="glass"][data-theme="dark"]{--text:#F5F5F7;--support:#C4C9E6;--card:rgba(255,255,255,.1);--slit:rgba(255,255,255,.3);
@@ -711,7 +711,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 
   /* ---------- copiar a configuração escolhida (pra colar no chat) ---------- */
   var NAMES = {
-    look:{clean:'Limpo', glass:'Vidro (só botões e placas, fundo de LEDs)', frost:'Vidro fosco (película translúcida, 1ª versão)', bold:'Ousado'},
+    look:{clean:'Limpo', glass:'Vidro (só botões e placas, fundo de manchas suaves)', frost:'Vidro fosco (película translúcida, 1ª versão)', bold:'Ousado'},
     theme:{light:'Claro', dark:'Escuro'}, icons:{line:'Traço', solid:'Cheio'},
     cards:{mono:'Preto e branco (claro: cards pretos; escuro: cards brancos)', color:'Cor do app'},
     motion:{spring:'Apple (mola)', simple:'Simples'}, view:{home:'Home', grid:'Grade'}
@@ -728,7 +728,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       'Logos: ' + (S.logo === 'mono' ? 'monocromático' : 'coloridos (valem no Limpo com cards pretos/brancos e no Vidro fosco)'),
       'Animação: ' + NAMES.motion[S.motion],
       'Tela em exibição: ' + NAMES.view[S.view],
-      'Fundo: ' + (S.bg ? 'cor livre ' + S.bg : (S.look === 'glass' ? 'LEDs desfocados' : S.look === 'frost' ? 'manchas de cor do app' : 'padrão do tema')),
+      'Fundo: ' + (S.bg ? 'cor livre ' + S.bg : (S.look === 'glass' || S.look === 'frost' ? 'manchas suaves de cor do app' : 'padrão do tema')),
       'Layout: design/v3 · código: prototype/launcher.html',
       '',
       '--- cores do palco agora ---'
