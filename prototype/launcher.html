@@ -34,6 +34,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .pad button:active{background:var(--page-accent);color:#fff}
 .pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .o{grid-column:2;grid-row:2;font-size:13px;font-weight:600}
 .pad .r{grid-column:3;grid-row:2}.pad .d{grid-column:2;grid-row:3}.pad .b{grid-column:1;grid-row:3;font-size:12px}
+.copybox{width:100%;min-height:150px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--page-fg);background:var(--page-card);border:1px solid var(--page-line);border-radius:12px;padding:12px;resize:vertical}
 .hint{font-size:12px;color:var(--page-mute);line-height:1.5;max-width:46ch}
 
 /* ---------- palco ---------- */
@@ -135,36 +136,52 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="clean"][data-cards="mono"][data-theme="dark"] .circ{box-shadow:0 8px 22px rgba(255,255,255,.06)}
 .stage[data-look="clean"][data-cards="mono"] .circ.on{background:var(--accent);color:#fff}
 
-/* ---- visual 2: Vidro (só botões, placas e menus; cards de app sólidos, como na dica do vídeo) ---- */
-.scene{position:absolute;inset:0;width:100%;height:100%;display:none}
-.stage[data-look="glass"] .scene{display:block}
-.stage[data-look="glass"]{--text:#10213d;--support:#2f4468;--card:rgba(255,255,255,.2);--slit:rgba(255,255,255,.55);
-  --sk1:#79bfff;--sk2:#cfe7ff;--sk3:#ffe2c6;--sun:#ffd47e;--m1:#92b9ea;--m2:#6f9fd6;--m3:#4a7bb4;--tw:#5b7eb0;--win:#fff2cd;
-  --gl1:rgba(255,255,255,.42);--gl2:rgba(255,255,255,.10);--gl3:rgba(255,255,255,.24);--rim:rgba(255,255,255,.9);--edge:rgba(255,255,255,.5)}
-.stage[data-look="glass"][data-theme="dark"]{--text:#F5F5F7;--support:#C4C9E6;--card:rgba(255,255,255,.1);--slit:rgba(255,255,255,.3);
-  --sk1:#060920;--sk2:#171d52;--sk3:#5a3a86;--sun:#eceaff;--m1:#1d2962;--m2:#141e50;--m3:#0c1236;--tw:#0f1744;--win:#ffd98a;
-  --gl1:rgba(255,255,255,.20);--gl2:rgba(255,255,255,.04);--gl3:rgba(255,255,255,.12);--rim:rgba(255,255,255,.55);--edge:rgba(255,255,255,.26)}
-.stage[data-look="glass"] .bg{background:transparent}
-.stage[data-look="glass"] .blob{opacity:.28}
-.stage[data-look="glass"][data-theme="dark"] .blob{opacity:.34}
-.stage[data-look="glass"] .date{color:var(--text);text-shadow:0 1px 10px rgba(255,255,255,.35)}
-.stage[data-look="glass"][data-theme="dark"] .date{text-shadow:0 1px 12px rgba(0,0,0,.5)}
+/* ---- visuais 2 e 3: Vidro (só botões, placas e menus) e Vidro total (tudo de vidro). Fundo: LEDs desfocados ---- */
+.stage:is([data-look="glass"],[data-look="glassall"]){--text:#10213d;--support:#34476b;--card:rgba(255,255,255,.2);--slit:rgba(255,255,255,.55);
+  --gl1:rgba(255,255,255,.46);--gl2:rgba(255,255,255,.12);--gl3:rgba(255,255,255,.26);--rim:rgba(255,255,255,.95);--edge:rgba(255,255,255,.55);background:#E7EAF4}
+.stage:is([data-look="glass"],[data-look="glassall"])[data-theme="dark"]{--text:#F5F5F7;--support:#C4C9E6;--card:rgba(255,255,255,.1);--slit:rgba(255,255,255,.3);
+  --gl1:rgba(255,255,255,.20);--gl2:rgba(255,255,255,.04);--gl3:rgba(255,255,255,.12);--rim:rgba(255,255,255,.55);--edge:rgba(255,255,255,.26);background:#04050B}
+.stage:is([data-look="glass"],[data-look="glassall"]) .bg{background:#E7EAF4}
+.stage:is([data-look="glass"],[data-look="glassall"])[data-theme="dark"] .bg{background:#04050B}
+.stage:is([data-look="glass"],[data-look="glassall"]) .blob{opacity:.22}
+.stage:is([data-look="glass"],[data-look="glassall"])[data-theme="dark"] .blob{opacity:.3}
+.leds{position:absolute;inset:0;display:none;pointer-events:none}
+.stage:is([data-look="glass"],[data-look="glassall"]) .leds{display:block}
+.led{position:absolute;border-radius:50%;background:var(--lc);filter:blur(var(--bl,16px));opacity:var(--o,.8);
+  animation:drift var(--dur,12s) ease-in-out infinite alternate,twinkle var(--tw,5s) ease-in-out infinite alternate;transition:background-color .7s var(--smooth)}
+.stage:is([data-look="glass"],[data-look="glassall"]) .led{opacity:calc(var(--o,.8)*.75)}
+.stage:is([data-look="glass"],[data-look="glassall"])[data-theme="dark"] .led{mix-blend-mode:screen;opacity:var(--o,.8)}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,12px),var(--dy,-18px))}}
+@keyframes twinkle{from{filter:blur(var(--bl,16px)) brightness(.75)}to{filter:blur(var(--bl,16px)) brightness(1.25)}}
+.stage:is([data-look="glass"],[data-look="glassall"]) .date{color:var(--text);text-shadow:0 1px 10px rgba(255,255,255,.35)}
+.stage:is([data-look="glass"],[data-look="glassall"])[data-theme="dark"] .date{text-shadow:0 1px 12px rgba(0,0,0,.5)}
 /* vidro: translúcido + desfoque + brilho na borda de cima */
-.stage[data-look="glass"] .circ,.stage[data-look="glass"] .tile,.stage[data-look="glass"] .card.util{
+.stage:is([data-look="glass"],[data-look="glassall"]) .circ,.stage:is([data-look="glass"],[data-look="glassall"]) .tile,.stage:is([data-look="glass"],[data-look="glassall"]) .card.util{
   background:linear-gradient(145deg,var(--gl1),var(--gl2) 55%,var(--gl3));
   -webkit-backdrop-filter:blur(16px) saturate(1.9) brightness(1.06);backdrop-filter:blur(16px) saturate(1.9) brightness(1.06);
   border:1px solid var(--edge);color:var(--text);
   box-shadow:inset 0 2px 1px var(--rim),inset 0 -2px 3px rgba(255,255,255,.2),inset 0 0 26px rgba(255,255,255,.16),0 18px 42px rgba(10,20,60,.22)}
-.stage[data-look="glass"] .tile::after{background:var(--slit);box-shadow:0 1px 0 rgba(0,0,0,.12)}
-.stage[data-look="glass"] .card.util .banner{background:transparent}
-.stage[data-look="glass"] .circ.on{background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 78%,white),var(--accent));border-color:rgba(255,255,255,.5);color:#fff;
+.stage:is([data-look="glass"],[data-look="glassall"]) .tile::after{background:var(--slit);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.stage:is([data-look="glass"],[data-look="glassall"]) .card.util .banner{background:transparent}
+.stage:is([data-look="glass"],[data-look="glassall"]) .card.util .wm,.stage:is([data-look="glass"],[data-look="glassall"]) .card.util .glyph,.stage:is([data-look="glass"],[data-look="glassall"]) .card.util .banner svg{color:var(--text)}
+.stage:is([data-look="glass"],[data-look="glassall"]) .circ.on{background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 78%,white),var(--accent));border-color:rgba(255,255,255,.5);color:#fff;
   box-shadow:inset 0 2px 1px rgba(255,255,255,.75),0 12px 34px color-mix(in srgb,var(--accent) 55%,transparent)}
+.stage:is([data-look="glass"],[data-look="glassall"]) .toast{background:linear-gradient(145deg,var(--gl1),var(--gl2));-webkit-backdrop-filter:blur(16px) saturate(1.8);backdrop-filter:blur(16px) saturate(1.8);
+  color:var(--text);border:1px solid var(--edge);box-shadow:inset 0 2px 1px var(--rim)}
+/* Vidro: cards de app sólidos, com brilho no alto */
 .stage[data-look="glass"] .card:not(.util){box-shadow:inset 0 2px 1px rgba(255,255,255,.5),0 20px 46px rgba(0,0,0,.28)}
 .stage[data-look="glass"] .card:not(.util)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 46%)}
 .stage[data-look="glass"] .card.on{box-shadow:inset 0 2px 1px rgba(255,255,255,.55),0 30px 70px rgba(0,0,0,.36)}
-.stage[data-look="glass"] .toast{background:linear-gradient(145deg,var(--gl1),var(--gl2));-webkit-backdrop-filter:blur(16px) saturate(1.8);backdrop-filter:blur(16px) saturate(1.8);
-  color:var(--text);border:1px solid var(--edge);box-shadow:inset 0 2px 1px var(--rim)}
+/* Vidro total: os cards de app também viram vidro */
+.stage[data-look="glassall"] .card:not(.util){background:linear-gradient(145deg,var(--gl1),var(--gl2) 55%,var(--gl3));color:var(--text);
+  -webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7);border:1.5px solid var(--edge);
+  box-shadow:inset 0 2px 1px var(--rim),0 20px 50px rgba(10,20,60,.2)}
+.stage[data-look="glassall"] .card:not(.util) .glyph{color:var(--c1);filter:saturate(1.2)}
+.stage[data-look="glassall"][data-theme="dark"] .card:not(.util) .glyph{color:#fff}
+.stage[data-look="glassall"] .card:not(.util) .banner{background:linear-gradient(135deg,color-mix(in srgb,var(--c1) 84%,transparent),color-mix(in srgb,var(--c2) 72%,transparent))}
+.stage[data-look="glassall"] .card:not(.util) .wm{color:#fff}
+.stage[data-look="glassall"] .card.on{box-shadow:inset 0 2px 1px var(--rim),0 34px 80px rgba(10,20,60,.32)}
 
 /* ---- visual 3: Ousado ---- */
 .stage[data-look="bold"]{--text:#fff;--support:rgba(255,255,255,.72);--card:rgba(255,255,255,.18);--slit:rgba(0,0,0,.28);
@@ -208,29 +225,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   <div class="vp" id="vp">
     <div class="stage" id="stage" data-look="clean" data-theme="light" data-view="home" data-cards="mono" data-motion="spring">
       <div class="bg">
-        <svg class="scene" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sk1)"/><stop offset=".6" style="stop-color:var(--sk2)"/><stop offset="1" style="stop-color:var(--sk3)"/></linearGradient>
-            <radialGradient id="gSun"><stop offset="0" style="stop-color:var(--sun)" stop-opacity=".95"/><stop offset="1" style="stop-color:var(--sun)" stop-opacity="0"/></radialGradient>
-            <pattern id="win" width="26" height="34" patternUnits="userSpaceOnUse"><rect x="6" y="7" width="10" height="16" rx="2" style="fill:var(--win)" opacity=".5"/></pattern>
-          </defs>
-          <rect width="1920" height="1080" fill="url(#gSky)"/>
-          <circle cx="1500" cy="470" r="420" fill="url(#gSun)"/>
-          <circle cx="1500" cy="470" r="70" style="fill:var(--sun)"/>
-          <path d="M0 690 L260 510 L480 640 L760 420 L1060 640 L1300 530 L1600 690 L1920 550 V1080 H0Z" style="fill:var(--m1)"/>
-          <path d="M0 820 L300 650 L620 790 L960 610 L1300 800 L1620 690 L1920 810 V1080 H0Z" style="fill:var(--m2)"/>
-          <g style="fill:var(--tw)">
-            <rect x="90" y="760" width="190" height="320"/><rect x="310" y="700" width="140" height="380"/><rect x="480" y="780" width="220" height="300"/>
-            <rect x="730" y="720" width="160" height="360"/><rect x="920" y="790" width="240" height="290"/><rect x="1190" y="740" width="150" height="340"/>
-            <rect x="1370" y="800" width="210" height="280"/><rect x="1610" y="730" width="170" height="350"/>
-          </g>
-          <g fill="url(#win)">
-            <rect x="90" y="760" width="190" height="320"/><rect x="310" y="700" width="140" height="380"/><rect x="480" y="780" width="220" height="300"/>
-            <rect x="730" y="720" width="160" height="360"/><rect x="920" y="790" width="240" height="290"/><rect x="1190" y="740" width="150" height="340"/>
-            <rect x="1370" y="800" width="210" height="280"/><rect x="1610" y="730" width="170" height="350"/>
-          </g>
-          <path d="M0 990 C400 900 820 1010 1200 945 S1720 930 1920 985 V1080 H0Z" style="fill:var(--m3)"/>
-        </svg>
+<div class="leds" id="leds"></div>
         <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
       <section class="screen home-screen" id="home">
@@ -252,11 +247,13 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     </div>
   </div>
 
+  <textarea id="copyBox" class="copybox" readonly hidden aria-label="Configuração para copiar"></textarea>
   <div class="ctrls">
     <div class="grp"><span>Visual</span>
       <div class="seg" id="sLook">
         <button data-v="clean" aria-pressed="true">Limpo</button>
         <button data-v="glass" aria-pressed="false">Vidro</button>
+        <button data-v="glassall" aria-pressed="false">Vidro total</button>
         <button data-v="bold" aria-pressed="false">Ousado</button>
       </div></div>
     <div class="grp"><span>Tema</span>
@@ -286,6 +283,9 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       </div></div>
     <div class="grp"><span>Relógio</span>
       <div class="seg"><button id="bFlip" aria-pressed="false">Virar minuto</button></div></div>
+    <div class="grp"><span>Configuração</span>
+      <div class="seg"><button id="bCopy">Copiar configuração</button></div>
+      <span id="copyMsg" class="hint" role="status"></span></div>
     <div class="grp"><span>Controle</span>
       <div class="pad" id="pad">
         <button class="u" data-k="up" aria-label="Cima">▲</button>
@@ -318,6 +318,24 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     else if (S.motion === 'spring'){ stage.style.setProperty('--spring', 'cubic-bezier(.34,1.28,.64,1)'); stage.style.setProperty('--sp', '.55s'); }
     else { stage.style.setProperty('--spring', 'cubic-bezier(.2,.8,.2,1)'); stage.style.setProperty('--sp', '.28s'); }
   }
+
+  /* ---------- LEDs desfocados do fundo (semente fixa) ---------- */
+  (function(){
+    var host = $('#leds'), seed = 11;
+    function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    var pal = ['#4f8dff','#ff4fa8','#ffb02e','#3de0c5','#9b6bff','#ffffff','#ff6a4d','#5ad1ff'];
+    for (var i = 0; i < 34; i++){
+      var size = 20 + rnd() * 84, el = document.createElement('i');
+      el.className = 'led';
+      el.style.cssText = 'left:' + (rnd() * 1880) + 'px;top:' + (rnd() * 1040) + 'px;width:' + size + 'px;height:' + size + 'px;' +
+        '--lc:' + (i % 6 === 0 ? 'var(--a)' : pal[Math.floor(rnd() * pal.length)]) + ';' +
+        '--bl:' + (10 + rnd() * 20).toFixed(0) + 'px;--o:' + (0.5 + rnd() * 0.45).toFixed(2) + ';' +
+        '--dur:' + (9 + rnd() * 10).toFixed(1) + 's;--tw:' + (3 + rnd() * 5).toFixed(1) + 's;' +
+        '--dx:' + (rnd() * 50 - 25).toFixed(0) + 'px;--dy:' + (rnd() * 50 - 25).toFixed(0) + 'px;' +
+        'animation-delay:-' + (rnd() * 9).toFixed(1) + 's,-' + (rnd() * 6).toFixed(1) + 's';
+      host.appendChild(el);
+    }
+  })();
 
   /* ---------- escala do palco ---------- */
   function fit(){ stage.style.transform = 'scale(' + (vp.clientWidth / 1920) + ')'; }
@@ -641,6 +659,45 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   bind('#sCards', function(v){ S.cards = v; paint(); });
   bind('#sMotion', function(v){ S.motion = v; paint(); });
   $('#bFlip').addEventListener('click', function(){ S.offMin += 1; tick(false); });
+
+  /* ---------- copiar a configuração escolhida (pra colar no chat) ---------- */
+  var NAMES = {
+    look:{clean:'Limpo', glass:'Vidro (só botões e placas)', glassall:'Vidro total (tudo de vidro)', bold:'Ousado'},
+    theme:{light:'Claro', dark:'Escuro'}, icons:{line:'Traço', solid:'Cheio'},
+    cards:{mono:'Preto e branco (claro: cards pretos; escuro: cards brancos)', color:'Cor do app'},
+    motion:{spring:'Apple (mola)', simple:'Simples'}, view:{home:'Home', grid:'Grade'}
+  };
+  function configText(){
+    var cs = getComputedStyle(stage), toks = ['--bg','--card','--on-card','--text','--support','--accent','--slit'];
+    if (S.look === 'glass' || S.look === 'glassall') toks = toks.concat(['--gl1','--gl2','--gl3','--rim','--edge']);
+    var lines = [
+      'PROTÓTIPO LAUNCHER TV · configuração escolhida',
+      'Visual: ' + NAMES.look[S.look],
+      'Tema: ' + NAMES.theme[S.theme],
+      'Ícones: ' + NAMES.icons[S.icons],
+      'Cards: ' + (S.look === 'clean' ? NAMES.cards[S.cards] : 'n/a neste visual'),
+      'Animação: ' + NAMES.motion[S.motion],
+      'Tela em exibição: ' + NAMES.view[S.view],
+      'Fundo: ' + ((S.look === 'glass' || S.look === 'glassall') ? 'LEDs desfocados' : 'liso (cor do tema)'),
+      'Layout: design/v3 · código: prototype/launcher.html',
+      '',
+      '--- cores do palco agora ---'
+    ];
+    toks.forEach(function(t){ lines.push(t + ': ' + cs.getPropertyValue(t).trim()); });
+    lines.push('', '(cole isto no chat do Claude pra aplicar no app)');
+    return lines.join('\n');
+  }
+  var copyTimer;
+  function copyMsg(t){ var m = $('#copyMsg'); m.textContent = t; clearTimeout(copyTimer); copyTimer = setTimeout(function(){ m.textContent = ''; }, 4000); }
+  $('#bCopy').addEventListener('click', function(){
+    var txt = configText(), box = $('#copyBox');
+    function fallback(){ box.hidden = false; box.value = txt; box.focus(); box.select(); copyMsg('Não deu pra copiar sozinho: o texto está selecionado abaixo, copie e cole no chat.'); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ box.hidden = true; copyMsg('Copiado. Cole no chat.'); }, fallback);
+      } else fallback();
+    } catch (e) { fallback(); }
+  });
 
   paint();
 })();
