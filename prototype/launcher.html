@@ -181,6 +181,13 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="glass"] .card:not(.util)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 46%)}
 .stage[data-look="glass"] .card.on{box-shadow:inset 0 2px 1px rgba(255,255,255,.55)}
+/* Vidro, cards transparentes: placa de vidro como os botões, só o logo vetorizado (cor do texto do tema) */
+.stage[data-look="glass"][data-gcards="clear"] .card:not(.util){background:linear-gradient(145deg,var(--gl1),var(--gl2) 55%,var(--gl3));border:1px solid var(--edge);
+  box-shadow:inset 0 2px 1px var(--rim)}
+.stage[data-look="glass"][data-gcards="clear"] .card:not(.util)::after{display:none}
+.stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .banner{background:transparent}
+.stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .glyph.logo,.stage[data-look="glass"][data-gcards="clear"] .card:not(.util) .wm{color:var(--text)}
+.stage[data-look="glass"][data-gcards="clear"] .card.on:not(.util){background:linear-gradient(145deg,rgba(255,255,255,.38),rgba(255,255,255,.14));border-color:var(--rim)}
 /* ---- visual 4: Vidro fosco (a primeira versão: película translúcida e fosca, manchas de cor do app no fundo) ---- */
 .stage[data-look="frost"]{--card:rgba(255,255,255,.62);--text:#1D1D1F;--support:#55555B;--slit:rgba(120,120,140,.35);background:#E9ECF4}
 .stage[data-look="frost"][data-theme="dark"]{--card:rgba(255,255,255,.10);--text:#F5F5F7;--support:#B4B4BA;--slit:rgba(0,0,0,.55);background:#06070B}
@@ -292,6 +299,11 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       <div class="seg" id="sCards">
         <button data-v="mono" aria-pressed="true">Preto e branco</button>
         <button data-v="color" aria-pressed="false">Cor do app</button>
+      </div></div>
+    <div class="grp"><span>Cards (Vidro)</span>
+      <div class="seg" id="sGCards">
+        <button data-v="color" aria-pressed="true">Cor do app</button>
+        <button data-v="clear" aria-pressed="false">Transparente</button>
       </div></div>
     <div class="grp"><span>Logos</span>
       <div class="seg" id="sLogo">
@@ -425,7 +437,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   function svg(k, style){ return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k][style] + '</svg>'; }
 
   /* ---------- estado ---------- */
-  var S = { look:'clean', theme:'light', icons:'solid', view:'home', cards:'mono', motion:'spring', logo:'mono', bg:null, dir:0,
+  var S = { look:'clean', theme:'light', icons:'solid', view:'home', cards:'mono', gcards:'color', motion:'spring', logo:'mono', bg:null, dir:0,
             zone:'strip', i:0,      // home: 'strip' | 'circles'
             gi:0, ci:4, si:0, scroll:0, gscroll:0, offMin:0, pos:[] };
 
@@ -566,7 +578,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   }
   function paint(){
     stage.dataset.look = S.look; stage.dataset.theme = S.theme; stage.dataset.view = S.view;
-    stage.dataset.cards = S.cards; stage.dataset.motion = S.motion; stage.dataset.logo = S.logo; applyMotion();
+    stage.dataset.cards = S.cards; stage.dataset.gcards = S.gcards; stage.dataset.motion = S.motion; stage.dataset.logo = S.logo; applyMotion();
     stage.dataset.bg = S.bg ? 'custom' : 'theme';
     if (S.bg){ stage.style.setProperty('--cbg', S.bg); stage.dataset.tone = lum(S.bg) > 0.5 ? 'light' : 'dark'; } else stage.dataset.tone = '';
     document.querySelectorAll('#sw button[data-c]').forEach(function(b){ b.setAttribute('aria-pressed', (S.bg && b.dataset.c.toLowerCase() === S.bg.toLowerCase()) ? 'true' : 'false'); });
@@ -577,7 +589,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     circEls.H.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'home' && S.zone === 'circles' && idx === S.ci); });
     circEls.G.forEach(function(b, idx){ b.classList.toggle('on', S.view === 'grid' && S.zone === 'side' && idx === S.si); });
     layoutStrip(); layoutGrid();
-    seg('#sLook', S.look); seg('#sTheme', S.theme); seg('#sIcons', S.icons); seg('#sView', S.view); seg('#sCards', S.cards); seg('#sMotion', S.motion); seg('#sLogo', S.logo);
+    seg('#sLook', S.look); seg('#sTheme', S.theme); seg('#sIcons', S.icons); seg('#sView', S.view); seg('#sCards', S.cards); seg('#sGCards', S.gcards); seg('#sMotion', S.motion); seg('#sLogo', S.logo);
     arrive();
   }
   function lum(hex){
@@ -702,6 +714,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   bind('#sIcons', function(v){ S.icons = v; refreshIcons(); paint(); });
   bind('#sView', function(v){ setView(v); });
   bind('#sCards', function(v){ S.cards = v; paint(); });
+  bind('#sGCards', function(v){ S.gcards = v; paint(); });
   bind('#sMotion', function(v){ S.motion = v; paint(); });
   bind('#sLogo', function(v){ S.logo = v; paint(); });
   document.querySelectorAll('#sw button[data-c]').forEach(function(b){ b.addEventListener('click', function(){ S.bg = b.dataset.c; paint(); }); });
@@ -724,7 +737,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
       'Visual: ' + NAMES.look[S.look],
       'Tema: ' + NAMES.theme[S.theme],
       'Ícones: ' + NAMES.icons[S.icons],
-      'Cards: ' + (S.look === 'clean' ? NAMES.cards[S.cards] : 'n/a neste visual'),
+      'Cards: ' + (S.look === 'clean' ? NAMES.cards[S.cards] : S.look === 'glass' ? (S.gcards === 'clear' ? 'Vidro transparente (só o logo em branco/tinta do tema)' : 'Vidro com cor do app') : 'n/a neste visual'),
       'Logos: ' + (S.logo === 'mono' ? 'monocromático' : 'coloridos (valem no Limpo com cards pretos/brancos e no Vidro fosco)'),
       'Animação: ' + NAMES.motion[S.motion],
       'Tela em exibição: ' + NAMES.view[S.view],

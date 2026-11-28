@@ -51,6 +51,7 @@ class MainActivity : Activity() {
     private var EDGE = 0       // borda fina do vidro
     private var SLIT = 0       // fresta das placas do relógio
     private var auraStrength = 0.5f
+    private var glassCards = false   // cards de app transparentes (só o logo em cor de texto); padrão: escuro sim, claro não
 
     private fun applyPalette() {
         fun c(h: String) = Color.parseColor(h)
@@ -159,6 +160,7 @@ class MainActivity : Activity() {
 
         dark = getSharedPreferences("minimaltv", MODE_PRIVATE).getBoolean("dark", false)
         applyPalette()
+        getSharedPreferences("minimaltv", MODE_PRIVATE).let { glassCards = if (it.contains("glassCards")) it.getBoolean("glassCards", false) else dark }
         loadCircleOrder()
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(BASE))
 
@@ -513,6 +515,10 @@ class MainActivity : Activity() {
 
     private fun circleMenu(anchor: View, id: Int) {
         val items = mutableListOf<Pair<String, () -> Unit>>("Mover" to { startMoveCircle(id) })
+        if (id == 1) items.add((if (glassCards) "Cards coloridos" else "Cards transparentes") to {
+            getSharedPreferences("minimaltv", MODE_PRIVATE).edit().putBoolean("glassCards", !glassCards).apply()
+            recreate()
+        })
         if (id == 2) items.add("Armazenamento" to { openSettings(Settings.ACTION_INTERNAL_STORAGE_SETTINGS) })
         showMenu(anchor, items)
     }
@@ -780,6 +786,7 @@ class MainActivity : Activity() {
     ): View {
         val isFav = showDot && pkg != null && pkg in favorites
         val util = pkg == null
+        val plate = util || glassCards     // placa de vidro (sem cor própria)
         val brand = pkg?.let { Brands.find(it, name) }
         val icon = pkg?.let { Apps.icon(this, it) }
         val c1 = brand?.c1 ?: (if (pkg != null && icon != null) Apps.color(pkg, icon) else CARD)
@@ -790,13 +797,13 @@ class MainActivity : Activity() {
             isFocusable = true
             contentDescription = name
             clipChildren = false
-            background = (if (util) glass(r) else round(c1, r)).apply { if (moving) setStroke(px(5), ACCENT) }
+            background = (if (plate) glass(r) else round(c1, r)).apply { if (moving) setStroke(px(5), ACCENT) }
 
             // Banner (card aberto): degradê da cor do app (ou vidro, nos cards sem app)
             val banner = FrameLayout(context).apply {
                 alpha = 0f
                 visibility = View.INVISIBLE
-                if (!util) background = GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(c1, c2)).apply { cornerRadius = r }
+                if (!plate) background = GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(c1, c2)).apply { cornerRadius = r }
                 clipToOutline = true
                 outlineProvider = object : ViewOutlineProvider() {
                     override fun getOutline(view: View, outline: Outline) {
@@ -816,7 +823,7 @@ class MainActivity : Activity() {
                 val d = this@MainActivity.getDrawable(brand.bannerLogo)!!.mutate()
                 val h = px(brand.bannerH)
                 val w = (h * d.intrinsicWidth.toFloat() / d.intrinsicHeight).roundToInt()
-                banner.addView(ImageView(context).apply { setImageDrawable(d); setColorFilter(brand.bannerInk, PorterDuff.Mode.SRC_IN) },
+                banner.addView(ImageView(context).apply { setImageDrawable(d); setColorFilter(if (glassCards) TEXT else brand.bannerInk, PorterDuff.Mode.SRC_IN) },
                     FrameLayout.LayoutParams(w, h, Gravity.BOTTOM or Gravity.START).apply { leftMargin = px(38); bottomMargin = px(30) })
             } else {
                 bannerImg = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
@@ -830,7 +837,7 @@ class MainActivity : Activity() {
                     util -> { setImageResource(glyph); setColorFilter(TEXT, PorterDuff.Mode.SRC_IN); alpha = .7f }
                     brand != null -> {
                         val d = this@MainActivity.getDrawable(brand.cardLogo)!!.mutate()
-                        setImageDrawable(d); setColorFilter(brand.ink, PorterDuff.Mode.SRC_IN)
+                        setImageDrawable(d); setColorFilter(if (glassCards) TEXT else brand.ink, PorterDuff.Mode.SRC_IN)
                     }
                     else -> setImageDrawable(icon)
                 }
@@ -856,6 +863,7 @@ class MainActivity : Activity() {
 
             setOnFocusChangeListener { v, has ->
                 animateWidth(v, if (has) CARD_W_ON else CARD_W, label)
+                if (plate) v.background = (if (has) glassOn(r) else glass(r)).apply { if (moving) setStroke(px(5), ACCENT) }
                 v.animate().translationY(if (has) -px(LIFT).toFloat() else 0f).setDuration(Motion.DUR).setInterpolator(Motion.spring).start()
                 var showBanner = util || brand != null
                 if (pkg != null && brand == null) {
@@ -962,6 +970,13 @@ class MainActivity : Activity() {
         GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(GL1, GL2, GL3)).apply {
             cornerRadius = radius
             setStroke(max(1, px(2)), EDGE)
+        }
+
+    /** Placa de vidro em foco: mais clara e com a borda forte (os cards transparentes precisam mostrar o foco). */
+    private fun glassOn(radius: Float) =
+        GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(Color.argb(97, 255, 255, 255), Color.argb(36, 255, 255, 255))).apply {
+            cornerRadius = radius
+            setStroke(max(1, px(2)), Color.argb(if (dark) 150 else 230, 255, 255, 255))
         }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
