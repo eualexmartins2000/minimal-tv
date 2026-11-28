@@ -821,8 +821,10 @@ class MainActivity : Activity() {
                 banner.addView(row, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL or Gravity.START).apply { leftMargin = px(38) })
             } else if (brand != null) {
                 val d = this@MainActivity.getDrawable(brand.bannerLogo)!!.mutate()
-                val h = px(brand.bannerH)
-                val w = (h * d.intrinsicWidth.toFloat() / d.intrinsicHeight).roundToInt()
+                // Nos cards transparentes o logo é o único elemento: fica maior (sem passar da largura do card)
+                val ratio = d.intrinsicWidth.toFloat() / d.intrinsicHeight
+                val h = min(px(brand.bannerH * (if (glassCards) 1.35f else 1f)), (px(CARD_W_ON - 76) / ratio).roundToInt())
+                val w = (h * ratio).roundToInt()
                 banner.addView(ImageView(context).apply { setImageDrawable(d); setColorFilter(if (glassCards) TEXT else brand.bannerInk, PorterDuff.Mode.SRC_IN) },
                     FrameLayout.LayoutParams(w, h, Gravity.BOTTOM or Gravity.START).apply { leftMargin = px(38); bottomMargin = px(30) })
             } else {
@@ -974,7 +976,7 @@ class MainActivity : Activity() {
 
     /** Placa de vidro em foco: mais clara e com a borda forte (os cards transparentes precisam mostrar o foco). */
     private fun glassOn(radius: Float) =
-        GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(Color.argb(97, 255, 255, 255), Color.argb(36, 255, 255, 255))).apply {
+        GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(Color.argb(if (dark) 46 else 120, 255, 255, 255), Color.argb(if (dark) 14 else 50, 255, 255, 255))).apply {
             cornerRadius = radius
             setStroke(max(1, px(2)), Color.argb(if (dark) 150 else 230, 255, 255, 255))
         }
