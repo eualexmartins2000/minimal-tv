@@ -42,9 +42,9 @@
 ## Logos de marca (protótipo e futuro app)
 - Vieram do Brandfetch (conector do Claude) e ficam em `design/logos/`. São marcas registradas das empresas:
   uso pessoal neste launcher; não redistribuir como produto.
-- Têm logo próprio: Netflix, Prime Video, YouTube, Google Play (Brandfetch) e CDNTV, MEGAFUTE e Downloader (imagens que o
-  Alex mandou; fontes em `design/logos/*-src.png`, vetorizadas com potrace em `design/logos/cdntv.svg`, `megafute.svg` e `downloader.svg`). Sem logo utilizável: Globoplay (só
-  selo "100 anos"), Alexa (só Amazon) e apps de sistema. Esses usam o ícone do app.
+- Têm logo próprio: Netflix, Prime Video, YouTube, Google Play (Brandfetch) e CDNTV, MEGAFUT, Downloader e Globoplay (imagens que o
+  Alex mandou; fontes em `design/logos/*-src.png`, vetorizadas com potrace em `design/logos/cdntv.svg`, `megafute.svg` e `downloader.svg`). Globoplay usa o logo empilhado (card quadrado) e o horizontal (banner), vermelho `#F50234`.
+  Sem logo utilizável: Alexa (só Amazon) e apps de sistema. Esses usam o ícone do app.
 - MEGAFUT é o app que a TV chama de MegaTV. Logo oficial = o ícone verde-limão `#C6F831` em fundo escuro
   (`design/logos/megafut-icon-src.webp`; vetores `megafut-symbol.svg` e `megafut-wordmark.svg`).
   A versão coral (`megafute.svg`) era de outra identidade e não é mais usada.
