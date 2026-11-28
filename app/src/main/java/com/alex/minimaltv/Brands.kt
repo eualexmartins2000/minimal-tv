@@ -11,6 +11,7 @@ class Brand(
     val c1: Int, val c2: Int, val ink: Int,
     val cardLogo: Int, val cardW: Int,
     val bannerLogo: Int, val bannerH: Int,
+    val bannerInk: Int = Color.WHITE,
 )
 
 object Brands {
@@ -21,9 +22,9 @@ object Brands {
     private val prime = Brand(c("#1399FF"), c("#08407F"), WHITE, R.drawable.logo_prime, 112, R.drawable.logo_prime_w, 62)
     private val globoplay = Brand(c("#F50234"), c("#730019"), WHITE, R.drawable.logo_globoplay, 150, R.drawable.logo_globoplay_w, 60)
     private val youtube = Brand(c("#FF3B30"), c("#7A1410"), WHITE, R.drawable.logo_youtube, 136, R.drawable.logo_youtube, 64)
-    private val megafute = Brand(c("#17181A"), c("#08090A"), c("#FF5858"), R.drawable.logo_megafute, 104, R.drawable.logo_megafute_w, 54)
+    private val megafute = Brand(c("#17181A"), c("#08090A"), c("#FF5858"), R.drawable.logo_megafute, 104, R.drawable.logo_megafute_w, 54, c("#FF5858"))
     private val cdntv = Brand(c("#FF6A1F"), c("#B83A06"), WHITE, R.drawable.logo_cdntv, 100, R.drawable.logo_cdntv_w, 60)
-    private val downloader = Brand(c("#F47921"), c("#8F4208"), WHITE, R.drawable.logo_downloader, 112, R.drawable.logo_downloader, 60)
+    private val downloader = Brand(c("#F47921"), c("#8F4208"), WHITE, R.drawable.logo_downloader, 112, R.drawable.logo_downloader_w, 72)
     private val alexa = Brand(c("#31C4F3"), c("#0B6F93"), WHITE, R.drawable.logo_alexa, 172, R.drawable.logo_alexa, 70)
     private val play = Brand(c("#34C77B"), c("#0D6B3A"), WHITE, R.drawable.logo_play, 100, R.drawable.logo_play, 64)
 

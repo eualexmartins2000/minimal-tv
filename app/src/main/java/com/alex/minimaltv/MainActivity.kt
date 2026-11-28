@@ -60,8 +60,9 @@ class MainActivity : Activity() {
         TEXT = c(if (dark) "#F5F5F7" else "#10213D")
         SUPPORT = c(if (dark) "#C4C9E6" else "#34476B")
         ACCENT = c(if (dark) "#0A84FF" else "#007AFF")
-        if (dark) { GL1 = w(.20f); GL2 = w(.04f); GL3 = w(.12f); EDGE = w(.26f); SLIT = w(.30f); auraStrength = .5f }
-        else { GL1 = w(.46f); GL2 = w(.12f); GL3 = w(.26f); EDGE = w(.55f); SLIT = w(.55f); auraStrength = .55f }
+        // Manchas mais fracas que no protótipo: a TV mostra áreas coloridas grandes bem mais claras que o monitor
+        if (dark) { GL1 = w(.16f); GL2 = w(.03f); GL3 = w(.09f); EDGE = w(.22f); SLIT = w(.26f); auraStrength = .22f }
+        else { GL1 = w(.46f); GL2 = w(.12f); GL3 = w(.26f); EDGE = w(.55f); SLIT = w(.55f); auraStrength = .42f }
     }
 
     // Medidas do modelo (design/v3, px em 1920x1080)
@@ -815,7 +816,7 @@ class MainActivity : Activity() {
                 val d = this@MainActivity.getDrawable(brand.bannerLogo)!!.mutate()
                 val h = px(brand.bannerH)
                 val w = (h * d.intrinsicWidth.toFloat() / d.intrinsicHeight).roundToInt()
-                banner.addView(ImageView(context).apply { setImageDrawable(d); setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN) },
+                banner.addView(ImageView(context).apply { setImageDrawable(d); setColorFilter(brand.bannerInk, PorterDuff.Mode.SRC_IN) },
                     FrameLayout.LayoutParams(w, h, Gravity.BOTTOM or Gravity.START).apply { leftMargin = px(38); bottomMargin = px(30) })
             } else {
                 bannerImg = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
