@@ -58,11 +58,11 @@ class MainActivity : Activity() {
         fun w(a: Float) = Color.argb((a * 255).roundToInt(), 255, 255, 255)
         BASE = c(if (dark) "#06070B" else "#E9ECF4")
         CARD = c(if (dark) "#2C2C2E" else "#FFFFFF")
-        TEXT = c(if (dark) "#F5F5F7" else "#10213D")
-        SUPPORT = c(if (dark) "#C4C9E6" else "#34476B")
+        TEXT = c(if (dark) "#D6D8E0" else "#10213D")      // escuro: branco apagado (menos luz na TV)
+        SUPPORT = c(if (dark) "#9EA3BF" else "#34476B")
         ACCENT = c(if (dark) "#0A84FF" else "#007AFF")
         // Manchas mais fracas que no protótipo: a TV mostra áreas coloridas grandes bem mais claras que o monitor
-        if (dark) { GL1 = w(.16f); GL2 = w(.03f); GL3 = w(.09f); EDGE = w(.22f); SLIT = w(.26f); auraStrength = .22f }
+        if (dark) { GL1 = w(.16f); GL2 = w(.03f); GL3 = w(.09f); EDGE = w(.20f); SLIT = w(.24f); auraStrength = .13f }
         else { GL1 = w(.46f); GL2 = w(.12f); GL3 = w(.26f); EDGE = w(.55f); SLIT = w(.55f); auraStrength = .42f }
     }
 
