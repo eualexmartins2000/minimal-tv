@@ -42,6 +42,7 @@
 ## Logos de marca (protótipo e futuro app)
 - Vieram do Brandfetch (conector do Claude) e ficam em `design/logos/`. São marcas registradas das empresas:
   uso pessoal neste launcher; não redistribuir como produto.
-- Têm logo próprio: Netflix, Prime Video, YouTube, Google Play. Sem logo utilizável: Globoplay (só selo
-  "100 anos"), Alexa (só Amazon), MegaTV, Downloader e apps de sistema. Esses usam o ícone do app.
+- Têm logo próprio: Netflix, Prime Video, YouTube, Google Play (Brandfetch) e CDNTV e MEGAFUTE (imagens que o
+  Alex mandou; fontes em `design/logos/*-src.png`, convertidas em máscara). Sem logo utilizável: Globoplay (só
+  selo "100 anos"), Alexa (só Amazon), Downloader e apps de sistema. Esses usam o ícone do app.
 - A TV nunca busca logo na internet: os arquivos são embutidos no app em tempo de build.
