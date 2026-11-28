@@ -27,6 +27,18 @@ object Apps {
         return seen.values.sortedBy { it.label.lowercase() }
     }
 
+    private val bannerCache = HashMap<String, Drawable.ConstantState>()
+
+    /** Banner retangular do app (apps de TV costumam ter). Null se não tiver. */
+    fun banner(ctx: Context, pkg: String): Drawable? = try {
+        bannerCache[pkg]?.newDrawable() ?: run {
+            val pm = ctx.packageManager
+            val d = pm.getApplicationBanner(pkg)
+                ?: pm.getLeanbackLaunchIntentForPackage(pkg)?.let { pm.getActivityBanner(it) }
+            d?.also { x -> x.constantState?.let { bannerCache[pkg] = it } }
+        }
+    } catch (e: Exception) { null }
+
     /** Ordena do instalado mais recentemente pro mais antigo. */
     fun newestFirst(ctx: Context, apps: List<App>): List<App> {
         val pm = ctx.packageManager
