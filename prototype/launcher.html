@@ -113,9 +113,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .card .wm{font-size:58px;font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap;
   transform:translateY(18px);opacity:0;transition:transform var(--sp) var(--spring),opacity .3s}
 .card.on .wm{transform:none;opacity:1}
-.card .art{position:absolute;right:-40px;top:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.14);
-  transform:translate(30px,-22px) scale(.88);transition:transform calc(var(--sp)*1.5) var(--spring)}
-.card.on .art{transform:none}
 .card.on .banner{opacity:1}.card.on .glyph{opacity:0}
 .card .dot{position:absolute;right:22px;top:22px;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px #fff}
 .card.util{background:var(--card);color:var(--on-card)}
@@ -137,19 +134,10 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .card .glyph.logo[data-k="prime"]{--lw:112px}
 .card .glyph.logo[data-k="alexa"]{--lw:172px}
 .card .glyph.logo[data-k="play"]{--lw:100px}
-.card .glyph.logo .pm{display:block;width:124px;height:124px;background:currentColor;
-  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center}
-.card .glyph.logo img{width:124px;height:124px;display:block}
-.mk{display:block;background:currentColor;aspect-ratio:var(--r,3);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center}
-.card .glyph.logo .mk{width:var(--lw,184px)}
-.card .glyph.logo .mkw{position:relative;display:block;width:var(--lw,184px);aspect-ratio:var(--r,3)}
-.mkw .mk{position:absolute;inset:0;width:100%}
-.card .wml .mk{height:56px;width:auto}
 .card .wml{display:flex;align-items:center;gap:18px}
 .card .wml .bl{display:flex;align-items:center}
 .card .wml svg{height:60px;width:auto;display:block}
 .card .wml[data-k="prime"] svg{height:62px}.card .wml[data-k="alexa"] svg{height:70px}.card .wml[data-k="play"] svg{height:64px}.card .wml[data-k="megafute"] svg{height:54px}.card .wml[data-k="youtube"] svg{height:64px}
-.card .wml .pm{width:76px;height:76px;background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center}
 .card .wmt{font-size:52px;font-weight:700;letter-spacing:-.03em;line-height:1}
 .stage[data-look="clean"][data-cards="mono"] .card:not(.util) .glyph.logo{color:var(--on-card)}
 .stage[data-look="frost"] .card:not(.util) .glyph.logo{color:var(--text)}
@@ -174,11 +162,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="glass"][data-theme="dark"] .bg,.stage[data-look="frost"][data-theme="dark"] .bg{background:#06070B}
 .stage[data-look="glass"] .blob,.stage[data-look="frost"] .blob{opacity:.55}
 .stage[data-look="glass"][data-theme="dark"] .blob,.stage[data-look="frost"][data-theme="dark"] .blob{opacity:.5}
-.leds{position:absolute;inset:0;display:none;pointer-events:none}
-.led{position:absolute;border-radius:50%;background:var(--lc);filter:blur(var(--bl,16px));opacity:var(--o,.8);
-  animation:drift var(--dur,12s) ease-in-out infinite alternate,twinkle var(--tw,5s) ease-in-out infinite alternate;transition:background-color .7s var(--smooth)}
-@keyframes drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,12px),var(--dy,-18px))}}
-@keyframes twinkle{from{filter:blur(var(--bl,16px)) brightness(.75)}to{filter:blur(var(--bl,16px)) brightness(1.25)}}
 .stage[data-look="glass"] .date{color:var(--text);text-shadow:0 1px 10px rgba(255,255,255,.35)}
 .stage[data-look="glass"][data-theme="dark"] .date{text-shadow:0 1px 12px rgba(0,0,0,.5)}
 /* vidro: translúcido + desfoque + brilho na borda de cima */
@@ -235,7 +218,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
 .stage[data-look="bold"] .card.on{background:#fff}
 .stage[data-look="bold"] .card:not(.util) .banner{background:#fff;align-items:flex-end}
 .stage[data-look="bold"] .card:not(.util) .wm{color:var(--c1);font-size:68px}
-.stage[data-look="bold"] .card:not(.util) .art{background:var(--c1);opacity:.14}
 .stage[data-look="bold"] .card.util .banner{background:#fff}
 .stage[data-look="bold"] .card.util .banner svg{color:var(--a)}
 .stage[data-look="bold"] .card.util .wm{color:#1D1D1F}
@@ -264,7 +246,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   <div class="vp" id="vp">
     <div class="stage" id="stage" data-look="clean" data-theme="light" data-view="home" data-cards="mono" data-motion="spring" data-logo="mono" data-bg="theme" data-tone="">
       <div class="bg">
-<div class="leds" id="leds"></div>
         <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
 
       <section class="screen home-screen" id="home">
@@ -378,24 +359,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     else if (S.motion === 'spring'){ stage.style.setProperty('--spring', 'cubic-bezier(.34,1.28,.64,1)'); stage.style.setProperty('--sp', '.55s'); }
     else { stage.style.setProperty('--spring', 'cubic-bezier(.2,.8,.2,1)'); stage.style.setProperty('--sp', '.28s'); }
   }
-
-  /* ---------- LEDs desfocados do fundo (semente fixa) ---------- */
-  (function(){
-    var host = $('#leds'), seed = 11;
-    function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-    var pal = ['#4f8dff','#ff4fa8','#ffb02e','#3de0c5','#9b6bff','#ffffff','#ff6a4d','#5ad1ff'];
-    for (var i = 0; i < 34; i++){
-      var size = 20 + rnd() * 84, el = document.createElement('i');
-      el.className = 'led';
-      el.style.cssText = 'left:' + (rnd() * 1880) + 'px;top:' + (rnd() * 1040) + 'px;width:' + size + 'px;height:' + size + 'px;' +
-        '--lc:' + (i % 6 === 0 ? 'var(--a)' : pal[Math.floor(rnd() * pal.length)]) + ';' +
-        '--bl:' + (10 + rnd() * 20).toFixed(0) + 'px;--o:' + (0.5 + rnd() * 0.45).toFixed(2) + ';' +
-        '--dur:' + (9 + rnd() * 10).toFixed(1) + 's;--tw:' + (3 + rnd() * 5).toFixed(1) + 's;' +
-        '--dx:' + (rnd() * 50 - 25).toFixed(0) + 'px;--dy:' + (rnd() * 50 - 25).toFixed(0) + 'px;' +
-        'animation-delay:-' + (rnd() * 9).toFixed(1) + 's,-' + (rnd() * 6).toFixed(1) + 's';
-      host.appendChild(el);
-    }
-  })();
 
   /* ---------- escala do palco ---------- */
   function fit(){ stage.style.transform = 'scale(' + (vp.clientWidth / 1920) + ')'; }
@@ -514,14 +477,6 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
   /* ---------- cards ---------- */
   function logoParts(k){
     var L = LOGOS[k]; if (!L) return null;
-    if (L.mask){
-      var r = L.ratio;
-      var mk = function(m, extra){ return '<span class="mk" style="--r:' + r + ';-webkit-mask-image:url(' + m + ');mask-image:url(' + m + ');' + (extra || '') + '"></span>'; };
-      return { mono:mk(L.mask),
-               color:L.maskB ? '<span class="mkw" style="--r:' + r + '">' + mk(L.maskA) + mk(L.maskB, 'background:' + L.accent) + '</span>' : mk(L.mask) };
-    }
-    if (L.png){ var m = 'url(' + L.png + ')';
-      return { mono:'<span class="pm" style="-webkit-mask-image:' + m + ';mask-image:' + m + '"></span>', color:'<img alt="" src="' + L.png + '">' }; }
     return { mono:L.mono, color:L.color, bmono:L.bmono || L.mono, bcolor:L.bcolor || L.color };
   }
   function glyphHTML(a){
@@ -539,7 +494,7 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
     var el = document.createElement('div');
     el.className = 'card'; el.style.setProperty('--c1', a.c1); el.style.setProperty('--c2', a.c2);
     if (a.ink) el.style.setProperty('--ink', a.ink);
-    el.innerHTML = glyphHTML(a) + '<div class="banner">' + bannerHTML(a) + '<i class="art"></i></div>' + (dot ? '<i class="dot"></i>' : '');
+    el.innerHTML = glyphHTML(a) + '<div class="banner">' + bannerHTML(a) + '</div>' + (dot ? '<i class="dot"></i>' : '');
     return el;
   }
   function fillUtil(el, it){

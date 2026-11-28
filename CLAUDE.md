@@ -43,15 +43,15 @@
 - Vieram do Brandfetch (conector do Claude) e ficam em `design/logos/`. São marcas registradas das empresas:
   uso pessoal neste launcher; não redistribuir como produto.
 - Têm logo próprio: Netflix, Prime Video, YouTube, Google Play (Brandfetch) e CDNTV, MEGAFUT, Downloader e Globoplay (imagens que o
-  Alex mandou; fontes em `design/logos/*-src.png`, vetorizadas com potrace em `design/logos/cdntv.svg`, `megafute.svg` e `downloader.svg`). Globoplay usa o logo empilhado (card quadrado) e o horizontal (banner), vermelho `#F50234`.
+  Alex mandou; fontes em `design/logos/*-src.png`, vetorizadas com potrace em `design/logos/cdntv.svg` e `downloader.svg`). Globoplay usa o logo empilhado (card quadrado) e o horizontal (banner), vermelho `#F50234`.
   Alexa (versão nova: "alexa" + sorriso, `alexa-mono.svg`/`alexa-color.svg` #008bd6, originais em `design/logos/drive/alexa/`), Prime Video (empilhado no card, horizontal no banner) e Google Play (triângulo) vêm de SVGs do SVG Repo/selfh.st
-  que o Alex salvou no Google Drive (originais em `design/logos/drive/`; versões prontas `alexa.svg`,
+  que o Alex salvou no Google Drive (originais em `design/logos/drive/`; versões prontas
   `prime-stacked.svg`, `prime-horizontal.svg`, `google-play-color.svg`, `google-play-mono.svg`).
   Netflix: símbolo "N" (card quadrado) em `netflix-n-color.svg` (vermelho chapado) e `netflix-n-mono.svg` (preto), imagens-fonte em `design/logos/netflix-n-*-src.*`; letreiro NETFLIX no banner.
   CDNTV: o "D" com play é o SÍMBOLO (card quadrado): `cdntv-symbol-color.svg` (laranja #F5611B) e `cdntv-symbol-mono.svg`; logo completo "cDn TV" no banner: `cdntv-full-color.svg` (laranja + cinza #5B6264) e `cdntv-full-mono.svg`. O original é card branco com logo colorido.
   Sem logo utilizável: apps de sistema. Esses usam o ícone do app.
 - MEGAFUT(E) é o app que a TV chama de MegaTV. A cor ORIGINAL da marca é o **vermelho `#FF5858`** (confirmado
   pelo Alex), não o verde. Logo no app = "M" (`design/logos/megafut-symbol-red.svg`, card quadrado) + letreiro
-  MEGAFUTE (`design/logos/megafute-wordmark-red.svg`, banner), os dois no mesmo vermelho. O ícone verde-limão
-  `#C6F831` (`megafut-icon-src.webp`) era outra variante e NÃO deve ser usado.
+  MEGAFUTE (`design/logos/megafute-wordmark-red.svg`, banner), os dois no mesmo vermelho. O verde-limão
+  `#C6F831` era outra variante e NÃO deve ser usado (arquivos apagados).
 - A TV nunca busca logo na internet: os arquivos são embutidos no app em tempo de build.
